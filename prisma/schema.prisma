@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Admin user for authentication
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Consultant model for the Consultants section
+model Consultant {
+  id            String   @id @default(cuid())
+  nameAr        String
+  nameEn        String
+  roleAr        String
+  roleEn        String
+  descriptionAr String?
+  descriptionEn String?
+  imageUrl      String?
+  isFeatured    Boolean  @default(false)
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Project model for the Projects section
+model Project {
+  id                   String   @id @default(cuid())
+  titleAr              String
+  titleEn              String
+  shortDescriptionAr   String
+  shortDescriptionEn   String
+  categoryAr           String?
+  categoryEn           String?
+  imageUrl             String
+  ctaLabelAr           String   @default("عرض التفاصيل")
+  ctaLabelEn           String   @default("View Details")
+  ctaLink              String?
+  order                Int      @default(0)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+// Partner model for the Partners section
+model Partner {
+  id         String   @id @default(cuid())
+  nameAr     String
+  nameEn     String
+  logoUrl    String
+  websiteUrl String?
+  order      Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Navigation item model for header menu
+model NavItem {
+  id         String   @id @default(cuid())
+  labelAr    String
+  labelEn    String
+  href       String
+  order      Int      @default(0)
+  isVisible  Boolean  @default(true)
+  isExternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Site text model for global/section texts
+model SiteText {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  headingAr String?
+  headingEn String?
+  bodyAr    String?
+  bodyEn    String?
+  extraJson String?  // JSON string for additional structured content
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
