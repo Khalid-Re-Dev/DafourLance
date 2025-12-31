@@ -321,7 +321,7 @@ export default function About({ siteTexts = {} }: AboutProps) {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-16 relative z-10">
         <motion.div
-          className={`max-w-3xl mb-16 lg:mb-20 ${isRTL ? "text-right mr-auto" : "text-left ml-auto"}`}
+          className={`max-w-3xl mb-16 lg:mb-20 mx-auto text-center ${isRTL ? "text-right mr-auto" : "text-left ml-auto"}`}
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
