@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from "next"
 import { Cairo } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
+import SmartAssistant from "@/components/smart-assistant"
+import { LanguageProvider } from "@/lib/i18n/language-context"
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -54,8 +56,11 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body className={`${cairo.variable} font-sans antialiased`}>
-        {children}
-        <Analytics />
+        <LanguageProvider>
+          {children}
+          <Analytics />
+          <SmartAssistant />
+        </LanguageProvider>
       </body>
     </html>
   )
