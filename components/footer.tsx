@@ -3,8 +3,8 @@
 import { motion } from "framer-motion"
 import { Youtube, Linkedin } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
+import Image from "next/image" // استيراد مكون الصورة
 
-// <CHANGE> Added siteTexts prop interface
 interface FooterProps {
   siteTexts?: Record<string, any>
 }
@@ -12,7 +12,6 @@ interface FooterProps {
 export default function Footer({ siteTexts = {} }: FooterProps) {
   const { t, language, isRTL } = useLanguage()
 
-  // <CHANGE> Get footer description from CMS if available
   const footerMain = siteTexts["footer.main"]
   const footerDescription = footerMain
     ? language === "ar"
@@ -52,14 +51,16 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
           transition={{ duration: 0.6 }}
         >
           <div className={isRTL ? "text-right" : "text-left"}>
-            <div className={`flex items-center gap-2 mb-4 ${isRTL ? "justify-end flex-row-reverse" : "justify-start"}`}>
-              <svg viewBox="0 0 40 40" className="w-10 h-10">
-                <circle cx="20" cy="20" r="18" fill="#fe6a52" />
-                <path d="M14 20 Q20 12 26 20 Q20 28 14 20" fill="white" />
-              </svg>
-              <span className="text-xl font-bold">
-                Dafor<span className="text-[#fe6a52]">L</span>ance
-              </span>
+            {/* Logo Section المحدثة في الفووتر */}
+            <div className={`flex items-center mb-6 ${isRTL ? "justify-end" : "justify-start"}`}>
+               <div className="relative h-16 w-40"> {/* حجم أكبر قليلاً للفووتر */}
+                  <Image 
+                    src={language === "ar" ? "/images/logo-ar.png" : "/images/logo-en.png"} 
+                    alt="DaforLance Logo"
+                    fill
+                    className="object-contain"
+                  />
+               </div>
             </div>
             <p className="text-[#9ea5ae] text-sm leading-relaxed">{footerDescription}</p>
           </div>
@@ -99,7 +100,7 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
                   whileTap={{ scale: 0.9 }}
                   aria-label={social.label}
                 >
-                  {typeof social.icon === "function" ? <social.icon /> : <social.icon className="w-5 h-5" />}
+                  {/* {typeof social.icon === "function" ? <social.icon /> : <social.icon className="w-5 h-5" />} */}
                 </motion.a>
               ))}
             </div>

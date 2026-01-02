@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
+import Image from "next/image" // استيراد مكون الصورة من Next.js
 
 interface NavItem {
   id: string
@@ -39,7 +40,7 @@ export default function Header({ navItems = [] }: HeaderProps) {
         ]
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, isExternal: boolean) => {
-    if (isExternal) return // Let external links work normally
+    if (isExternal) return 
 
     if (href.startsWith("#") && href !== "#") {
       e.preventDefault()
@@ -65,19 +66,22 @@ export default function Header({ navItems = [] }: HeaderProps) {
       className="bg-background/95 backdrop-blur-md py-4 px-6 lg:px-12 sticky top-0 z-50 border-b border-border/50"
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
+        {/* Logo Section المحدثة */}
         <motion.div
-          className="flex items-center gap-2"
+          className="flex items-center"
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400 }}
         >
-          <svg viewBox="0 0 40 40" className="w-10 h-10">
-            <circle cx="20" cy="20" r="18" fill="#fe6a52" />
-            <path d="M14 20 Q20 12 26 20 Q20 28 14 20" fill="white" />
-          </svg>
-          <span className="text-xl font-bold text-foreground tracking-tight">
-            Dafor<span className="text-[#fe6a52]">L</span>ance
-          </span>
+          <a href="#" className="relative h-12 w-auto min-w-[120px]">
+             {/* اختيار الشعار بناءً على اللغة */}
+             <Image 
+                src={language === "ar" ? "/images/logo-ar.png" : "/images/logo-en.png"} 
+                alt="DaforLance Logo"
+                fill
+                className="object-contain"
+                priority
+             />
+          </a>
         </motion.div>
 
         {/* Desktop Navigation */}
