@@ -1,30 +1,29 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Youtube, Linkedin } from "lucide-react"
-import { useLanguage } from "@/lib/i18n/language-context"
-import Image from "next/image" // استيراد مكون الصورة
+import { motion } from "framer-motion";
+import { Youtube, Linkedin } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/language-context";
 
 interface FooterProps {
-  siteTexts?: Record<string, any>
+  siteTexts?: Record<string, any>;
 }
 
 export default function Footer({ siteTexts = {} }: FooterProps) {
-  const { t, language, isRTL } = useLanguage()
+  const { t, language, isRTL } = useLanguage();
 
-  const footerMain = siteTexts["footer.main"]
+  const footerMain = siteTexts["footer.main"];
   const footerDescription = footerMain
     ? language === "ar"
       ? footerMain.bodyAr
       : footerMain.bodyEn
-    : t.footer.description
+    : t.footer.description;
 
   const quickLinks = [
     { label: t.nav.home, href: "#" },
     { label: t.nav.about, href: "#about" },
     { label: t.nav.projects, href: "#projects" },
     { label: t.nav.members, href: "#members" },
-  ]
+  ];
 
   const socialLinks = [
     { icon: Linkedin, href: "#", label: "LinkedIn" },
@@ -38,7 +37,7 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
       label: "X",
     },
     { icon: Youtube, href: "#", label: "YouTube" },
-  ]
+  ];
 
   return (
     <footer className="bg-[#1f2b3b] text-white py-16">
@@ -51,18 +50,28 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
           transition={{ duration: 0.6 }}
         >
           <div className={isRTL ? "text-right" : "text-left"}>
-            {/* Logo Section المحدثة في الفووتر */}
-            <div className={`flex items-center mb-6 ${isRTL ? "justify-end" : "justify-start"}`}>
-               <div className="relative h-16 w-40"> {/* حجم أكبر قليلاً للفووتر */}
-                  <Image 
-                    src={language === "ar" ? "/images/logo-ar.png" : "/images/logo-en.png"} 
-                    alt="DaforLance Logo"
-                    fill
-                    className="object-contain"
-                  />
-               </div>
+            {/* Logo Section - استخدام شعار الفوتر الخاص */}
+            <div
+              className={`flex items-center mb-6 ${
+                isRTL ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div className="w-[220px] md:w-[280px]">
+                <img
+                  src={
+                    language === "ar"
+                      ? "/images/logo-footer-ar.png"
+                      : "/images/logo-footer-en.png"
+                  }
+                  alt="DaforLance Footer Logo"
+                  className="w-full h-auto max-h-[120px] object-contain"
+                  style={{ imageRendering: "crisp-edges" }}
+                />
+              </div>
             </div>
-            <p className="text-[#9ea5ae] text-sm leading-relaxed">{footerDescription}</p>
+            <p className="text-[#9ea5ae] text-sm leading-relaxed">
+              {footerDescription}
+            </p>
           </div>
 
           <div className={isRTL ? "text-right" : "text-left"}>
@@ -70,7 +79,10 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
             <ul className="space-y-3 text-[#9ea5ae]">
               {quickLinks.map((link, index) => (
                 <motion.li key={index} whileHover={{ x: isRTL ? -5 : 5 }}>
-                  <a href={link.href} className="hover:text-[#fe6a52] transition-colors">
+                  <a
+                    href={link.href}
+                    className="hover:text-[#fe6a52] transition-colors"
+                  >
                     {link.label}
                   </a>
                 </motion.li>
@@ -90,7 +102,11 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
 
           <div className={isRTL ? "text-right" : "text-left"}>
             <h4 className="font-bold text-lg mb-4">{t.footer.contactUs}</h4>
-            <div className={`flex gap-3 ${isRTL ? "justify-end" : "justify-start"}`}>
+            <div
+              className={`flex gap-3 ${
+                isRTL ? "justify-end" : "justify-start"
+              }`}
+            >
               {socialLinks.map((social, index) => (
                 <motion.a
                   key={index}
@@ -120,5 +136,5 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
         </motion.div>
       </div>
     </footer>
-  )
+  );
 }

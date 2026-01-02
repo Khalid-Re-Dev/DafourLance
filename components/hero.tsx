@@ -81,7 +81,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
               />
             </motion.div>
 
-            {/* Floating Elements */}
+            {/* Floating Elements Icons */}
             <motion.div
               className={`absolute top-8 ${isRTL ? "right-12 lg:right-4" : "left-12 lg:left-4"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
               initial={{ scale: 0, rotate: -180 }}
@@ -155,24 +155,40 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
             <p className="text-muted-foreground text-base lg:text-lg leading-relaxed mb-8 max-w-xl">
               {heroDescription}
             </p>
+            
             <motion.div
               className={`flex flex-wrap gap-4 ${isRTL ? "justify-end" : "justify-start"}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4 }}
             >
+              {/* <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button className="bg-[#fe6a52] hover:bg-[#e55a42] text-white rounded-full px-8 py-6 text-base font-medium shadow-lg shadow-[#fe6a52]/25 relative overflow-hidden group">
+                    <span className="relative z-10">{ctaPrimary}</span>
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                  </Button>
+                </motion.div>
+              */}
+
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button className="bg-[#fe6a52] hover:bg-[#e55a42] text-white rounded-full px-8 py-6 text-base font-medium shadow-lg shadow-[#fe6a52]/25 relative overflow-hidden group">
-                  <span className="relative z-10">{ctaPrimary}</span>
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant="outline"
-                  className="border-2 border-foreground text-foreground hover:bg-foreground hover:text-background rounded-full px-8 py-6 text-base font-medium bg-transparent"
+                <Button 
+                  className="bg-[#fe6a52] hover:bg-[#e55a42] text-white rounded-full px-8 py-6 text-base font-medium shadow-lg shadow-[#fe6a52]/25 relative overflow-hidden group"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    const element = document.querySelector("#services")
+                    if (element) {
+                      const headerOffset = 80
+                      const elementPosition = element.getBoundingClientRect().top
+                      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth",
+                      })
+                    }
+                  }}
                 >
-                  {ctaSecondary}
+                  <span className="relative z-10">{ctaSecondary}</span>
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
                 </Button>
               </motion.div>
             </motion.div>
