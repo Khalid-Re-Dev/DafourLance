@@ -8,6 +8,7 @@ interface AboutProps {
   siteTexts?: Record<string, any>
 }
 
+// ملاحظة: هذا الكائن موجود في ملفك الأصلي ولكن المكون يستخدم siteTexts للترجمة
 const aboutData = {
   ar: {
     overline: "من نحن",
@@ -121,6 +122,7 @@ function PillarCard({
 
   return (
     <motion.div
+      // أعدنا الكلاسات الأصلية: أزلنا items-center و text-center لتعود المحاذاة طبيعية
       className="group relative bg-white rounded-[20px] p-6 lg:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_40px_rgba(254,106,82,0.12)] transition-all duration-500 cursor-pointer overflow-hidden h-full"
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -135,6 +137,7 @@ function PillarCard({
       <div className="absolute inset-0 bg-gradient-to-br from-[#fe6a52]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[20px]" />
 
       <motion.div
+        // أزلنا mx-auto لتعود الأيقونة لمكانها الأصلي
         className="relative w-14 h-14 bg-[#fef2ee] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[#fe6a52] transition-colors duration-400"
         whileHover={{ scale: 1.05, rotate: 5 }}
         transition={{ type: "spring", stiffness: 400, damping: 15 }}
@@ -159,6 +162,7 @@ function PillarCard({
           {pillar.items.map((item, i) => (
             <motion.li
               key={i}
+              // أزلنا justify-center ليعود النص للجانب الصحيح
               className={`flex items-start gap-2.5 text-[#6b7280] text-[14px] leading-relaxed ${isRTL ? "flex-row-reverse" : ""}`}
               initial={{ opacity: 0, x: isRTL ? 10 : -10 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -177,6 +181,7 @@ function PillarCard({
           {pillar.values.map((value, i) => (
             <motion.div
               key={i}
+              // أزلنا justify-center
               className={`flex items-center gap-2 bg-[#f9fafb] rounded-xl px-3 py-2.5 group/value hover:bg-[#fef2ee] transition-colors duration-300 ${isRTL ? "flex-row-reverse" : ""}`}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -191,6 +196,7 @@ function PillarCard({
         </div>
       )}
 
+      {/* أعدنا اتجاه التمدد للخط السفلي ليناسب اللغة */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#fe6a52] to-[#f5c842] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rtl:origin-right" />
     </motion.div>
   )
@@ -320,8 +326,9 @@ export default function About({ siteTexts = {} }: AboutProps) {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#f5c842]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-16 relative z-10">
+        {/* التعديل الجوهري: تم تثبيت التوسيط هنا للقسم العلوي فقط */}
         <motion.div
-          className={`max-w-3xl mb-16 lg:mb-20 mx-auto text-center ${isRTL ? "text-right mr-auto" : "text-left ml-auto"}`}
+          className="max-w-3xl mb-16 lg:mb-20 mx-auto text-center"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
