@@ -113,7 +113,7 @@ function ProjectCard({
 }) {
   return (
     <motion.div
-      className="group relative bg-white rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_rgba(31,43,59,0.15)] transition-all duration-500 cursor-pointer"
+      className="group relative bg-white rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_rgba(31,43,59,0.15)] transition-all duration-500 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.75rem)]"
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
@@ -189,7 +189,7 @@ export default function Projects({ projects = [], siteTexts = {} }: ProjectsProp
           ctaLabel: language === "ar" ? p.ctaLabelAr : p.ctaLabelEn,
           ctaLink: p.ctaLink,
         }))
-      : fallbackProjectsData[language]
+      : fallbackProjectsData[language as "ar" | "en"]
 
   const sectionTitle = siteTexts["projects.main"]
     ? language === "ar"
@@ -231,17 +231,10 @@ export default function Projects({ projects = [], siteTexts = {} }: ProjectsProp
             <h2 className="text-3xl lg:text-[42px] font-bold text-[#1f2b3b] mb-4">{sectionTitle}</h2>
             <p className="text-[#6b7280] text-base lg:text-lg max-w-xl leading-relaxed">{sectionDescription}</p>
           </div>
-          <motion.button
-            className={`flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-md hover:shadow-lg text-[#1f2b3b] font-semibold transition-all duration-300 group ${isRTL ? "flex-row-reverse" : ""}`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span>{t.projects.viewAll}</span>
-            <Arrow className="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
-          </motion.button>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7">
+        {/* تم التعديل هنا للتوسيط التلقائي */}
+        <div className="flex flex-wrap justify-center gap-6 lg:gap-7">
           {displayProjects.slice(0, 4).map((project, index) => (
             <ProjectCard key={project.id} project={project} index={index} isRTL={isRTL} />
           ))}

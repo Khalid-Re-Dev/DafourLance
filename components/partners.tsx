@@ -17,7 +17,6 @@ interface PartnersProps {
   siteTexts?: Record<string, any>
 }
 
-// Fallback static data
 const fallbackPartners = [
   { name: "قوفي", nameEn: "Qufi", isArabic: true },
   { name: "عبدالصمد القرشي", nameEn: "Abdul Samad", isArabic: true },
@@ -82,9 +81,9 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
           <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">{sectionDescription}</p>
         </motion.div>
 
-        {/* Partners Grid - First Row */}
+        {/* تم تغيير grid إلى flex justify-center للتوسيط */}
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 lg:gap-8 items-center mb-8"
+          className="flex flex-wrap justify-center items-center gap-6 lg:gap-8 mb-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -93,7 +92,7 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
           {displayPartners.slice(0, 5).map((partner, index) => (
             <motion.div
               key={index}
-              className="flex flex-col items-center justify-center h-20 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-400 cursor-pointer"
+              className="flex flex-col items-center justify-center h-20 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-400 cursor-pointer min-w-[140px]"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -101,23 +100,16 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
               whileHover={{ scale: 1.08 }}
             >
               {partner.logoUrl ? (
-                <img
-                  src={partner.logoUrl || "/placeholder.svg"}
-                  alt={partner.name}
-                  className="max-h-12 max-w-full object-contain"
-                />
+                <img src={partner.logoUrl} alt={partner.name} className="max-h-12 max-w-full object-contain" />
               ) : (
-                <span className="text-lg lg:text-xl font-bold text-muted-foreground hover:text-[#1f2b3b] transition-colors">
-                  {partner.name}
-                </span>
+                <span className="text-lg lg:text-xl font-bold text-muted-foreground hover:text-[#1f2b3b] transition-colors">{partner.name}</span>
               )}
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Partners Grid - Second Row */}
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 lg:gap-8 items-center"
+          className="flex flex-wrap justify-center items-center gap-6 lg:gap-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -126,7 +118,7 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
           {displayPartners.slice(5, 10).map((partner, index) => (
             <motion.div
               key={index}
-              className="flex flex-col items-center justify-center h-20 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-400 cursor-pointer"
+              className="flex flex-col items-center justify-center h-20 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-400 cursor-pointer min-w-[140px]"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -134,34 +126,19 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
               whileHover={{ scale: 1.08 }}
             >
               {partner.logoUrl ? (
-                <img
-                  src={partner.logoUrl || "/placeholder.svg"}
-                  alt={partner.name}
-                  className="max-h-12 max-w-full object-contain"
-                />
+                <img src={partner.logoUrl} alt={partner.name} className="max-h-12 max-w-full object-contain" />
               ) : (
-                <span className="text-lg lg:text-xl font-bold text-muted-foreground hover:text-[#1f2b3b] transition-colors">
-                  {partner.name}
-                </span>
+                <span className="text-lg lg:text-xl font-bold text-muted-foreground hover:text-[#1f2b3b] transition-colors">{partner.name}</span>
               )}
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Navigation Arrows */}
         <div className="flex justify-center gap-3 mt-10">
-          <motion.button
-            className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
+          <motion.button className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
-          <motion.button
-            className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
+          <motion.button className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
             <ChevronRight className="w-5 h-5" />
           </motion.button>
         </div>

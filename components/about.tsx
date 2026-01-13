@@ -116,7 +116,7 @@ export default function About({ siteTexts = {} }: AboutProps) {
   const aboutValues = siteTexts["about.values"]
 
   const content = {
-    overline: language === "ar" ? "من نحن" : "About Us",
+    overline: language === "ar" ? "" : "About Us",
     title: aboutMain
       ? language === "ar"
         ? aboutMain.headingAr
