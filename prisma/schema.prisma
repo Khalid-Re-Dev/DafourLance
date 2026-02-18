@@ -9,7 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 🔐 إدارة المستخدمين (لم يتغير)
+// 🔐 إدارة المستخدمين
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -20,7 +20,7 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-// 👨‍🏫 نموذج المستشارين (لم يتغير)
+// 👨‍🏫 نموذج المستشارين
 model Consultant {
   id            String   @id @default(cuid())
   nameAr        String
@@ -37,7 +37,7 @@ model Consultant {
   updatedAt     DateTime @updatedAt
 }
 
-// 🏗️ نموذج المشاريع (تم التحديث لإضافة التفاصيل ومعرض الصور)
+// 🏗️ نموذج المشاريع
 model Project {
   id                 String   @id @default(cuid())
   titleAr            String
@@ -59,7 +59,7 @@ model Project {
   updatedAt          DateTime @updatedAt
 }
 
-// 🤝 نموذج الشركاء (لم يتغير)
+// 🤝 نموذج الشركاء
 model Partner {
   id         String   @id @default(cuid())
   nameAr     String
@@ -72,7 +72,7 @@ model Partner {
   updatedAt  DateTime @updatedAt
 }
 
-// 🔗 نموذج روابط التنقل (لم يتغير)
+// 🔗 نموذج روابط التنقل
 model NavItem {
   id         String   @id @default(cuid())
   labelAr    String
@@ -85,7 +85,7 @@ model NavItem {
   updatedAt  DateTime @updatedAt
 }
 
-// 📝 نموذج النصوص الثابتة (لم يتغير)
+// 📝 نموذج النصوص الثابتة
 model SiteText {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -102,43 +102,43 @@ model SiteText {
 
 // 📱 إعدادات تذييل الصفحة (Footer)
 model FooterConfig {
-  id              String   @id @default(cuid())
-  phone           String?
-  phone2          String?
-  email           String?
-  whatsapp        String?
-  addressAr       String?
-  addressEn       String?
-  linkedinUrl     String?
-  twitterUrl      String?
-  youtubeUrl      String?
-  instagramUrl    String?
-  facebookUrl     String?
-  descriptionAr   String?
-  descriptionEn   String?
-  copyrightAr     String?
-  copyrightEn     String?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  phone         String?
+  phone2        String?
+  email         String?
+  whatsapp      String?
+  addressAr     String?
+  addressEn     String?
+  linkedinUrl   String?
+  twitterUrl    String?
+  youtubeUrl    String?
+  instagramUrl  String?
+  facebookUrl   String?
+  descriptionAr String?
+  descriptionEn String?
+  copyrightAr   String?
+  copyrightEn   String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // 📞 معلومات التواصل في صفحة الاتصال
 model ContactInfo {
-  id              String   @id @default(cuid())
-  phone           String?
-  phone2          String?
-  email           String?
-  whatsapp        String?
-  addressAr       String?
-  addressEn       String?
-  titleAr         String?
-  titleEn         String?
-  subtitleAr      String?
-  subtitleEn      String?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id         String   @id @default(cuid())
+  phone      String?
+  phone2     String?
+  email      String?
+  whatsapp   String?
+  addressAr  String?
+  addressEn  String?
+  titleAr    String?
+  titleEn    String?
+  subtitleAr String?
+  subtitleEn String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 // 📩 رسائل الزوار المستلمة
@@ -154,15 +154,15 @@ model ContactMessage {
   updatedAt DateTime @updatedAt
 }
 
-// 🖼️ سجل الصور المرفوعة (لإدارة الملفات)
+// 🖼️ سجل الصور المرفوعة
 model UploadedImage {
-  id          String   @id @default(cuid())
-  filename    String
-  url         String
-  mimeType    String?
-  size        Int?
-  category    String?  // "partner", "consultant", "project"
-  entityId    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String?
+  size      Int?
+  category  String? 
+  entityId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
