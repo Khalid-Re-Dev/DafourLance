@@ -160,7 +160,7 @@ export default function Services({ siteTexts = {} }: ServicesProps) {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            {language === "ar" ? "ما نقدمه" : "What We Offer"}
+            {language === "ar" ? "" : "What We Offer"}
           </motion.span>
           <h2 className="text-3xl lg:text-[42px] font-bold text-[#1f2b3b] mb-5">{sectionTitle}</h2>
           <p className="text-[#6b7280] text-base lg:text-lg max-w-2xl mx-auto leading-relaxed">{sectionDescription}</p>
