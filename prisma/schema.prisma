@@ -166,3 +166,10 @@ model UploadedImage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ⚙️ إعدادات النظام (مفتاح OpenAI وغيرها)
+model SystemSettings {
+  id        String   @id @default("singleton")
+  openAiKey String?
+  updatedAt DateTime @updatedAt
+}
