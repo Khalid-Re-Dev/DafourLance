@@ -12,20 +12,6 @@ export async function POST(req: NextRequest) {
 
     language = langFromClient === "en" ? "en" : "ar"
 
-    // تحقق من وجود المفتاح
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY is missing in environment variables")
-      return NextResponse.json(
-        {
-          reply:
-            language === "ar"
-              ? "إعداد خدمة الذكاء الاصطناعي غير مكتمل على الخادم."
-              : "AI service is not configured on the server.",
-        },
-        { status: 500 },
-      )
-    }
-
     if (!message || typeof message !== "string") {
       return NextResponse.json(
         { reply: language === "ar" ? "الرسالة غير صالحة." : "Invalid message." },
@@ -52,10 +38,10 @@ export async function POST(req: NextRequest) {
       { role: "user" as const, content: message },
     ]
 
-    // استدعاء askAi مع اسم الموديل فقط
+    // askAi now resolves the API key from DB → env fallback internally
     const answer = await askAi({
       messages: messagesForModel,
-      model: "gpt-4o-mini", 
+      model: "gpt-4o-mini",
       temperature: 0.2,
     })
 
@@ -66,8 +52,21 @@ export async function POST(req: NextRequest) {
         : "Sorry, I couldn't generate a reply.")
 
     return NextResponse.json({ reply })
-  } catch (err) {
+  } catch (err: any) {
     console.error("AI /api/ai-chat error:", err)
+
+    // Surface the "not configured" message from askAi
+    if (err?.message?.includes("not configured")) {
+      return NextResponse.json(
+        {
+          reply:
+            language === "ar"
+              ? "مفتاح OpenAI غير مُعدّ. يرجى ضبطه من لوحة التحكم."
+              : "OpenAI API Key is not configured. Please set it in the Admin Dashboard.",
+        },
+        { status: 500 },
+      )
+    }
 
     return NextResponse.json(
       {
