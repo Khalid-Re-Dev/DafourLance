@@ -1,6 +1,6 @@
 // lib/ai/ask-ai.ts
 import { generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import prisma from "@/lib/db"
 
 export type ChatMessageRole = "system" | "user" | "assistant"
@@ -10,12 +10,16 @@ export interface ChatMessage {
   content: string
 }
 
-/**
- * Resolve the OpenAI API key:
- *   1. Database (SystemSettings.openAiKey)  ← Admin Dashboard
- *   2. Environment variable (OPENAI_API_KEY) ← .env fallback
- *   3. null → caller should return a graceful error
- */
+export class AiServiceError extends Error {
+  public readonly statusCode: number
+
+  constructor(message: string, statusCode: number = 500) {
+    super(message)
+    this.name = "AiServiceError"
+    this.statusCode = statusCode
+  }
+}
+
 async function resolveApiKey(): Promise<string | null> {
   try {
     const settings = await prisma.systemSettings.findUnique({
@@ -33,7 +37,7 @@ async function resolveApiKey(): Promise<string | null> {
 export async function askAi({
   messages,
   temperature = 0.2,
-  model = "gpt-4o-mini",
+  model = "openrouter/free",
 }: {
   messages: ChatMessage[]
   temperature?: number
@@ -42,17 +46,20 @@ export async function askAi({
   const apiKey = await resolveApiKey()
 
   if (!apiKey) {
-    throw new Error(
-      "OpenAI API Key is not configured. Please set it in the Admin Dashboard.",
+    throw new AiServiceError(
+      "API Key is not configured. Please set it in the Admin Dashboard.",
+      503,
     )
   }
 
-  // Create the provider per-request so it always uses the latest key
-  const openaiProvider = createOpenAI({ apiKey })
+  // استخدام المزود الرسمي لـ OpenRouter
+  const openrouter = createOpenRouter({
+    apiKey: apiKey,
+  })
 
   try {
     const { text } = await generateText({
-      model: openaiProvider(model),
+      model: openrouter(model),
       messages,
       temperature,
     })
@@ -61,13 +68,35 @@ export async function askAi({
   } catch (error: any) {
     console.error("AI API error:", error)
 
+    const statusCode: number | undefined =
+      error?.statusCode ?? error?.status ?? error?.data?.statusCode
+
     if (
-      error instanceof Error &&
-      error.message.toLowerCase().includes("api key")
+      statusCode === 429 ||
+      error?.message?.toLowerCase().includes("quota") ||
+      error?.message?.toLowerCase().includes("rate limit")
     ) {
-      throw new Error("AI service configuration error. Please contact support.")
+      throw new AiServiceError(
+        "The AI service is temporarily unavailable due to quota limits. Please contact the administrator.",
+        429,
+      )
     }
 
-    throw new Error("Failed to generate AI response")
+    if (
+      statusCode === 401 ||
+      statusCode === 403 ||
+      (error instanceof Error &&
+        error.message.toLowerCase().includes("api key"))
+    ) {
+      throw new AiServiceError(
+        "AI service configuration error. The API key may be invalid or revoked. Please contact support.",
+        statusCode ?? 401,
+      )
+    }
+
+    throw new AiServiceError(
+      "Failed to generate AI response. Please try again later.",
+      statusCode ?? 500,
+    )
   }
 }
