@@ -12,6 +12,9 @@ import {
   FileText,
   Settings,
   ChevronRight,
+  Mail,        // تم إضافة استيراد أيقونة الرسائل
+  PhoneCall,   // تم إضافة استيراد أيقونة معلومات التواصل
+  PanelBottom, // تم إضافة استيراد أيقونة الفوتر
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -22,6 +25,13 @@ const navItems = [
   { label: "Partners", href: "/admin/partners", icon: Handshake },
   { label: "Navigation", href: "/admin/navigation", icon: Navigation },
   { label: "Content", href: "/admin/content", icon: FileText },
+  
+  // --- الأقسام الجديدة المضافة ---
+  { label: "Messages", href: "/admin/messages", icon: Mail }, 
+  { label: "Contact Info", href: "/admin/contact-info", icon: PhoneCall },
+  { label: "Footer Settings", href: "/admin/footer", icon: PanelBottom },
+  // -----------------------------
+
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ]
 
@@ -29,7 +39,7 @@ export default function AdminSidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 bg-white border-r border-[#e5e7eb] min-h-screen flex flex-col">
+    <aside className="w-64 bg-white border-r border-[#e5e7eb] min-h-screen flex flex-col sticky top-0">
       {/* Logo */}
       <div className="p-6 border-b border-[#e5e7eb]">
         <Link href="/admin" className="flex items-center gap-2">
@@ -47,7 +57,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
           const Icon = item.icon

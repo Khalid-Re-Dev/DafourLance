@@ -1,83 +1,59 @@
 import prisma from "@/lib/db"
 
-// Fetch all active consultants ordered by their order field
+// جلب الاستشاريين
 export async function getConsultants() {
   try {
     return await prisma.consultant.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
     })
-  } catch {
-    // Return empty array if database is not yet initialized
-    return []
-  }
+  } catch { return [] }
 }
 
-// Fetch all active projects ordered by their order field
+// جلب المشاريع (محدث لجلب كافة الحقول الجديدة)
 export async function getProjects() {
   try {
     return await prisma.project.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
     })
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
-// Fetch all active partners ordered by their order field
+// جلب الشركاء
 export async function getPartners() {
   try {
     return await prisma.partner.findMany({
       where: { isActive: true },
       orderBy: { order: "asc" },
     })
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
-// Fetch all visible nav items ordered by their order field
+// جلب عناصر القائمة
 export async function getNavItems() {
   try {
     return await prisma.navItem.findMany({
       where: { isVisible: true },
       orderBy: { order: "asc" },
     })
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
-// Fetch a site text by its key
-export async function getSiteText(key: string) {
-  try {
-    return await prisma.siteText.findUnique({
-      where: { key },
-    })
-  } catch {
-    return null
-  }
-}
-
-// Fetch all site texts (useful for bulk loading)
+// جلب نصوص الموقع بالكامل
 export async function getAllSiteTexts() {
   try {
     const texts = await prisma.siteText.findMany()
-    // Convert to a map for easy access
-    return texts.reduce(
-      (acc, text) => {
-        acc[text.key] = text
-        return acc
-      },
-      {} as Record<string, (typeof texts)[0]>,
-    )
-  } catch {
-    return {}
-  }
+    return texts.reduce((acc, text) => {
+      acc[text.key] = text
+      return acc
+    }, {} as Record<string, any>)
+  } catch { return {} }
 }
 
-// Helper to get localized content from a site text
+/** * الدوال المساعدة (Helper Functions) التي كانت في ملفك الأصلي
+ * ضماناً لعدم تعطل أي جزء آخر من الموقع يستخدم هذه الدوال
+ */
 export function getLocalizedText(
   text: { headingAr?: string | null; headingEn?: string | null; bodyAr?: string | null; bodyEn?: string | null } | null,
   language: "ar" | "en",
@@ -89,13 +65,11 @@ export function getLocalizedText(
   }
 }
 
-// Helper to get localized field from any record with Ar/En fields
-export function getLocalized<T extends Record<string, unknown>>(
-  record: T,
+export function getLocalized<T extends Record<string, any>>(
+  item: T,
   field: string,
-  language: "ar" | "en",
-): string {
-  const arField = `${field}Ar` as keyof T
-  const enField = `${field}En` as keyof T
-  return (language === "ar" ? record[arField] : record[enField]) as string
+  language: "ar" | "en"
+): any {
+  const key = `${field}${language === "ar" ? "Ar" : "En"}`
+  return item[key] || item[field] || ""
 }

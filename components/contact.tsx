@@ -1,12 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Phone, Mail, MessageCircle } from "lucide-react"
+import { Phone, Mail, MessageCircle, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
+// استيراد الأكشن
+import { submitContactForm } from "@/app/actions/submit-contact"
 
 interface ContactProps {
   siteTexts?: Record<string, any>
@@ -15,6 +17,10 @@ interface ContactProps {
 export default function Contact({ siteTexts = {} }: ContactProps) {
   const { t, isRTL, language } = useLanguage()
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  
+  // حالات الإرسال
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
 
   const contactMain = siteTexts["contact.main"]
   const sectionTitle = contactMain
@@ -33,6 +39,25 @@ export default function Contact({ siteTexts = {} }: ContactProps) {
     `rounded-xl border-border bg-background h-12 transition-all duration-300 ${
       isRTL ? "text-right" : "text-left"
     } ${focusedField === fieldName ? "border-[#fe6a52] ring-2 ring-[#fe6a52]/20" : ""}`
+
+  // دالة معالجة الفورم
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    const formData = new FormData(e.currentTarget)
+    const result = await submitContactForm(formData)
+
+    setIsSubmitting(false)
+    if (result.success) {
+      setSubmitStatus("success")
+      ;(e.target as HTMLFormElement).reset()
+      setTimeout(() => setSubmitStatus("idle"), 5000)
+    } else {
+      setSubmitStatus("error")
+    }
+  }
 
   return (
     <section id="contact" className="py-16 lg:py-24 bg-gradient-to-b from-[#fbd8cc] via-[#fce8e2] to-[#fef6f3]">
@@ -64,50 +89,86 @@ export default function Contact({ siteTexts = {} }: ContactProps) {
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <Input
-                placeholder={t.contact.firstName}
-                className={getInputClass("firstName")}
-                onFocus={() => setFocusedField("firstName")}
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <Input
+                  name="firstName"
+                  placeholder={t.contact.firstName}
+                  required
+                  className={getInputClass("firstName")}
+                  onFocus={() => setFocusedField("firstName")}
+                  onBlur={() => setFocusedField(null)}
+                />
+                <Input
+                  name="lastName"
+                  placeholder={t.contact.lastName}
+                  required
+                  className={getInputClass("lastName")}
+                  onFocus={() => setFocusedField("lastName")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <Input
+                  name="email"
+                  placeholder={t.contact.emailField}
+                  type="email"
+                  required
+                  className={getInputClass("email")}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField(null)}
+                />
+                <Input
+                  name="phone"
+                  placeholder={t.contact.phone}
+                  type="tel"
+                  className={getInputClass("phone")}
+                  onFocus={() => setFocusedField("phone")}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+              <Textarea
+                name="message"
+                placeholder={t.contact.message}
+                required
+                className={`rounded-xl border-border bg-background min-h-[140px] mb-6 resize-none transition-all duration-300 ${
+                  isRTL ? "text-right" : "text-left"
+                } ${focusedField === "message" ? "border-[#fe6a52] ring-2 ring-[#fe6a52]/20" : ""}`}
+                onFocus={() => setFocusedField("message")}
                 onBlur={() => setFocusedField(null)}
               />
-              <Input
-                placeholder={t.contact.lastName}
-                className={getInputClass("lastName")}
-                onFocus={() => setFocusedField("lastName")}
-                onBlur={() => setFocusedField(null)}
-              />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <Input
-                placeholder={t.contact.emailField}
-                type="email"
-                className={getInputClass("email")}
-                onFocus={() => setFocusedField("email")}
-                onBlur={() => setFocusedField(null)}
-              />
-              <Input
-                placeholder={t.contact.phone}
-                type="tel"
-                className={getInputClass("phone")}
-                onFocus={() => setFocusedField("phone")}
-                onBlur={() => setFocusedField(null)}
-              />
-            </div>
-            <Textarea
-              placeholder={t.contact.message}
-              className={`rounded-xl border-border bg-background min-h-[140px] mb-6 resize-none transition-all duration-300 ${
-                isRTL ? "text-right" : "text-left"
-              } ${focusedField === "message" ? "border-[#fe6a52] ring-2 ring-[#fe6a52]/20" : ""}`}
-              onFocus={() => setFocusedField("message")}
-              onBlur={() => setFocusedField(null)}
-            />
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button className="w-full bg-foreground hover:bg-foreground/90 text-background rounded-full py-6 text-base font-medium relative overflow-hidden group">
-                <span className="relative z-10">{t.contact.send}</span>
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
-              </Button>
-            </motion.div>
+              
+              <div className="space-y-4">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-foreground hover:bg-foreground/90 text-background rounded-full py-6 text-base font-medium relative overflow-hidden group"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                    ) : (
+                      <span className="relative z-10">{t.contact.send}</span>
+                    )}
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
+                  </Button>
+                </motion.div>
+
+                {/* عرض رسالة النجاح أو الخطأ */}
+                <AnimatePresence>
+                  {submitStatus === "success" && (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 text-sm font-bold text-center">
+                       {isRTL ? "تم إرسال رسالتك بنجاح!" : "Message sent successfully!"}
+                    </motion.p>
+                  )}
+                  {submitStatus === "error" && (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-600 text-sm font-bold text-center">
+                       {isRTL ? "حدث خطأ أثناء الإرسال" : "Error sending message"}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+              </div>
+            </form>
           </motion.div>
 
           <motion.div

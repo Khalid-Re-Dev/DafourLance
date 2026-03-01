@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -10,7 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Admin user for authentication
+// 🔐 إدارة المستخدمين
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -21,7 +20,7 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-// Consultant model for the Consultants section
+// 👨‍🏫 نموذج المستشارين
 model Consultant {
   id            String   @id @default(cuid())
   nameAr        String
@@ -38,26 +37,29 @@ model Consultant {
   updatedAt     DateTime @updatedAt
 }
 
-// Project model for the Projects section
+// 🏗️ نموذج المشاريع
 model Project {
-  id                   String   @id @default(cuid())
-  titleAr              String
-  titleEn              String
-  shortDescriptionAr   String
-  shortDescriptionEn   String
-  categoryAr           String?
-  categoryEn           String?
-  imageUrl             String
-  ctaLabelAr           String   @default("عرض التفاصيل")
-  ctaLabelEn           String   @default("View Details")
-  ctaLink              String?
-  order                Int      @default(0)
-  isActive             Boolean  @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  titleAr            String
+  titleEn            String
+  shortDescriptionAr String
+  shortDescriptionEn String
+  fullDescriptionAr  String? 
+  fullDescriptionEn  String?  
+  categoryAr         String?
+  categoryEn         String?
+  imageUrl           String
+  galleryImages      String? 
+  ctaLabelAr         String   @default("عرض التفاصيل")
+  ctaLabelEn         String   @default("View Details")
+  ctaLink            String?
+  order              Int      @default(0)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
-// Partner model for the Partners section
+// 🤝 نموذج الشركاء
 model Partner {
   id         String   @id @default(cuid())
   nameAr     String
@@ -70,7 +72,7 @@ model Partner {
   updatedAt  DateTime @updatedAt
 }
 
-// Navigation item model for header menu
+// 🔗 نموذج روابط التنقل
 model NavItem {
   id         String   @id @default(cuid())
   labelAr    String
@@ -83,7 +85,7 @@ model NavItem {
   updatedAt  DateTime @updatedAt
 }
 
-// Site text model for global/section texts
+// 📝 نموذج النصوص الثابتة
 model SiteText {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -91,7 +93,83 @@ model SiteText {
   headingEn String?
   bodyAr    String?
   bodyEn    String?
-  extraJson String?  // JSON string for additional structured content
+  extraJson String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- 🌟 النماذج الجديدة المضافة من v0 ---
+
+// 📱 إعدادات تذييل الصفحة (Footer)
+model FooterConfig {
+  id            String   @id @default(cuid())
+  phone         String?
+  phone2        String?
+  email         String?
+  whatsapp      String?
+  addressAr     String?
+  addressEn     String?
+  linkedinUrl   String?
+  twitterUrl    String?
+  youtubeUrl    String?
+  instagramUrl  String?
+  facebookUrl   String?
+  descriptionAr String?
+  descriptionEn String?
+  copyrightAr   String?
+  copyrightEn   String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// 📞 معلومات التواصل في صفحة الاتصال
+model ContactInfo {
+  id         String   @id @default(cuid())
+  phone      String?
+  phone2     String?
+  email      String?
+  whatsapp   String?
+  addressAr  String?
+  addressEn  String?
+  titleAr    String?
+  titleEn    String?
+  subtitleAr String?
+  subtitleEn String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// 📩 رسائل الزوار المستلمة
+model ContactMessage {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 🖼️ سجل الصور المرفوعة
+model UploadedImage {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String?
+  size      Int?
+  category  String? 
+  entityId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ⚙️ إعدادات النظام (مفتاح OpenAI وغيرها)
+model SystemSettings {
+  id        String   @id @default("singleton")
+  openAiKey String?
   updatedAt DateTime @updatedAt
 }
