@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
-import Image from "next/image"
+import Logo from "@/components/logo"
 
 interface NavItem {
   id: string
@@ -28,20 +28,20 @@ export default function Header({ navItems = [] }: HeaderProps) {
   const displayNavItems =
     navItems.length > 0
       ? navItems.map((item) => ({
-          label: language === "ar" ? item.labelAr : item.labelEn,
-          href: item.href,
-          isExternal: item.isExternal,
-        }))
+        label: language === "ar" ? item.labelAr : item.labelEn,
+        href: item.href,
+        isExternal: item.isExternal,
+      }))
       : [
-          { label: t.nav.home, href: "#", isExternal: false },
-          { label: t.nav.about, href: "#about", isExternal: false },
-          { label: t.nav.services, href: "#services", isExternal: false },
-          { label: t.nav.consultants, href: "#consultants", isExternal: false },
-          { label: t.nav.projects, href: "#projects", isExternal: false },
-        ]
+        { label: t.nav.home, href: "#", isExternal: false },
+        { label: t.nav.about, href: "#about", isExternal: false },
+        { label: t.nav.services, href: "#services", isExternal: false },
+        { label: t.nav.consultants, href: "#consultants", isExternal: false },
+        { label: t.nav.projects, href: "#projects", isExternal: false },
+      ]
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, isExternal: boolean) => {
-    if (isExternal) return 
+    if (isExternal) return
 
     if (href.startsWith("#") && href !== "#") {
       e.preventDefault()
@@ -69,24 +69,16 @@ export default function Header({ navItems = [] }: HeaderProps) {
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        
-        {/* قسم الشعار - تم تكبير الحجم مع الحفاظ على التناسب */}
-        <motion.div
+
+        {/* قسم الشعار */}
+        <motion.a
+          href="#"
           className="flex items-center"
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400 }}
         >
-          {/* تم زيادة h-12 إلى h-15 وزيادة العرض المسموح به */}
-          <a href="#" className="relative h-15 w-[180px] md:w-[240px] block">
-             <Image 
-                src="/images/logo.svg" 
-                alt="DaforLance Logo"
-                fill
-                className="object-contain ltr:object-left rtl:object-right"
-                priority
-             />
-          </a>
-        </motion.div>
+          <Logo variant="header" />
+        </motion.a>
 
         {/* روابط التنقل للشاشات الكبيرة */}
         <nav className="hidden lg:flex items-center gap-8">
@@ -128,8 +120,8 @@ export default function Header({ navItems = [] }: HeaderProps) {
         </div>
 
         {/* زر القائمة للجوال */}
-        <button 
-          className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors" 
+        <button
+          className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -149,10 +141,10 @@ export default function Header({ navItems = [] }: HeaderProps) {
           >
             <nav className="flex flex-col gap-4">
               {displayNavItems.map((item, index) => (
-                <motion.a 
-                  key={index} 
-                  href={item.href} 
-                  className="font-medium text-muted-foreground px-2 hover:text-[#fe6a52]" 
+                <motion.a
+                  key={index}
+                  href={item.href}
+                  className="font-medium text-muted-foreground px-2 hover:text-[#fe6a52]"
                   onClick={(e) => handleNavClick(e, item.href, item.isExternal)}
                   initial={{ x: isRTL ? 20 : -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -165,8 +157,8 @@ export default function Header({ navItems = [] }: HeaderProps) {
                 <Button className="bg-[#fe6a52] text-white rounded-full w-full">
                   {t.nav.contact}
                 </Button>
-                <button 
-                  onClick={toggleLanguage} 
+                <button
+                  onClick={toggleLanguage}
                   className="w-full px-4 py-2 rounded-full border border-border text-sm font-medium hover:bg-muted transition-colors"
                 >
                   {language === "ar" ? "Switch to English" : "التحويل للعربية"}

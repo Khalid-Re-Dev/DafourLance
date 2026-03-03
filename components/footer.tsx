@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Youtube, Linkedin } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/language-context";
-import Image from "next/image";
+import Logo from "@/components/logo";
 
 interface FooterProps {
   siteTexts?: Record<string, any>;
@@ -41,8 +41,8 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
   ];
 
   return (
-    <footer 
-      className="bg-[#1f2b3b] text-white py-16 lg:py-20" 
+    <footer
+      className="bg-[#1f2b3b] text-white py-16 lg:py-20"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -54,17 +54,9 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
           transition={{ duration: 0.6 }}
         >
           <div className="flex flex-col">
-            {/* قسم الشعار الموحد - SVG وتكبير الحجم */}
+            {/* قسم الشعار */}
             <div className="mb-6">
-              <div className="relative w-[300px] md:w-[320px] h-[150px]">
-                <Image
-                  src="/images/logo-footer.svg"
-                  alt="DaforLance Footer Logo"
-                  fill
-                  className="object-contain ltr:object-left rtl:object-right"
-                  priority
-                />
-              </div>
+              <Logo variant="footer" />
             </div>
             <p className="text-[#9ea5ae] text-sm leading-relaxed max-w-xs">
               {footerDescription}
@@ -76,8 +68,8 @@ export default function Footer({ siteTexts = {} }: FooterProps) {
             <ul className="space-y-4 text-[#9ea5ae]">
               {quickLinks.map((link, index) => (
                 <li key={index}>
-                  <a 
-                    href={link.href} 
+                  <a
+                    href={link.href}
                     className="hover:text-[#fe6a52] transition-colors duration-300"
                   >
                     {link.label}

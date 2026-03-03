@@ -1,6 +1,56 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ── DIN Next LT W23 Font (commercial – place files in /public/fonts/) ── */
+@font-face {
+  font-family: 'DIN Next LT W23';
+  src: url('/fonts/DINNextLTW23-Regular.woff2') format('woff2'),
+    url('/fonts/DINNextLTW23-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Next LT W23';
+  src: url('/fonts/DINNextLTW23-Bold.woff2') format('woff2'),
+    url('/fonts/DINNextLTW23-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Responsive Logo Sizing ── */
+@media (max-width: 640px) {
+  .logo-icon {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .logo-primary-text {
+    font-size: 18px !important;
+  }
+
+  .logo-secondary-text {
+    font-size: 10px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .logo-icon {
+    width: 62px !important;
+    height: 62px !important;
+  }
+
+  .logo-primary-text {
+    font-size: 26px !important;
+  }
+
+  .logo-secondary-text {
+    font-size: 13px !important;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
