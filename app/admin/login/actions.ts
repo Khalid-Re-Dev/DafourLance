@@ -43,12 +43,12 @@ export async function loginAction(formData: FormData) {
     })
 
     if (!user) {
-      return { error: "Invalid email or password", success: false }
+      return { error: "Invalid email", success: false }
     }
 
     const isValid = await verifyPassword(password, user.password)
     if (!isValid) {
-      return { error: "Invalid email or password", success: false }
+      return { error: "Invalid password", success: false }
     }
 
     const token = await createSession(user.id)
