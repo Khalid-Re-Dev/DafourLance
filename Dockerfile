@@ -5,7 +5,7 @@ COPY package.json package-lock.json* pnpm-lock.yaml* ./
 RUN npm install
 # or if you use pnpm: RUN npm install -g pnpm && pnpm install
 
-# Stage 2: Build and generate Prisma client
+# Stage 2: Build and generate Prisma client 
 FROM node:20 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
