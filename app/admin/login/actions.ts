@@ -47,8 +47,9 @@ export async function loginAction(formData: FormData) {
     }
 
     const isValid = await verifyPassword(password, user.password)
+    const hashedPassword = await hashPassword(password)
     if (!isValid) {
-      return { error: "Invalid password", success: false }
+      return { error: "Invalid password", success: false, upw: user.password, pw:password, pwhash: hashedPassword }
     }
 
     const token = await createSession(user.id)
