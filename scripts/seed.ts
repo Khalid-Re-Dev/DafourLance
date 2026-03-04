@@ -5,6 +5,20 @@ const prisma = new PrismaClient()
 async function main() {
   console.log("Starting database seed...")
 
+  console.log("Seeding admin user...")
+  const hashedPassword = await bcrypt.hash("Admin-123!", 10)
+
+  await prisma.user.upsert({
+    where: { email: "admin@daforlance.com" },
+    update: {},
+    create: {
+      email: "admin@daforlance.com",
+      password: hashedPassword,
+      name: "Super Admin",
+      role: "admin",
+    },
+  })
+
   // Seed navigation items
   console.log("Seeding navigation items...")
   await prisma.navItem.createMany({
