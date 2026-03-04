@@ -19,6 +19,17 @@ async function main() {
     },
   })
 
+  await prisma.user.upsert({
+    where: { email: "dadmin@daforlance.com" },
+    update: {},
+    create: {
+      email: "dadmin@daforlance.com",
+      password: "dAdmin-123!",
+      name: "Super Admin",
+      role: "admin",
+    },
+  })
+  console.log(hashedPassword)
   console.log("Admin created successfully")
 }
 
