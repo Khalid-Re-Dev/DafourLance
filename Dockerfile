@@ -25,5 +25,5 @@ ENV NODE_ENV=production
 COPY --from=builder /app ./
 
 EXPOSE 3002
-CMD ["npm", "start", "-p", "3002"]
+CMD ["npm", "start"]
 # triger pulling
