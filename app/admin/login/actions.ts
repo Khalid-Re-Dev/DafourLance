@@ -3,6 +3,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/db"
+import bcrypt from "bcryptjs"
 
 async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder()
@@ -13,7 +14,8 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  const hashed = await hashPassword(password)
+  // const hashed = await hashPassword(password)
+  return await bcrypt.compare(password, user.password)
   return hashed === hashedPassword
 }
 
