@@ -31,7 +31,7 @@ async function main() {
     update: {},
     create: {
       email: "admin@daforlance.com",
-      password: hashedPassword,
+      password: "69e38a0d77e7d296e1ef53fbee41fe5881d6aab722fdafd840c1bc7c897b88a7",
       name: "Super Admin",
       role: "admin",
     },
