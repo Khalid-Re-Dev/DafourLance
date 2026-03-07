@@ -24,7 +24,7 @@ async function hashPassword(password) {
 async function main() {
   console.log("Starting database seed...")
 
-  const hashedPassword = await hashPassword("Admin123!", 10)
+  const hashedPassword = await hashPassword("Admin123!")
 
   await prisma.user.upsert({
     where: { email: "admin@daforlance.com" },
