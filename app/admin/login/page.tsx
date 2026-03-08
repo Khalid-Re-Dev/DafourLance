@@ -136,11 +136,7 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-[#f3f4f6] text-center">
-            <p className="text-sm text-[#9ca3af]">
-              Default credentials: <span className="text-[#6b7280]">admin@dafourlance.com / admin123</span>
-            </p>
-          </div>
+
         </motion.div>
       </motion.div>
     </div>
