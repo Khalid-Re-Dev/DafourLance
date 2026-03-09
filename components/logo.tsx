@@ -23,7 +23,7 @@ export default function Logo({ variant = "header", className = "" }: LogoProps) 
     const iconDarkColor = isFooter ? "#ffffff" : "#1d2a3a";
     const iconAccentColor = "#f3825a";
     const primaryTextColor = isFooter ? "#ffffff" : "#1d2a3a";
-    const secondaryTextColor = isFooter ? "#9ea5ae" : "#6b7280";
+    const secondaryTextColor = "#fe6a52";
 
     // i18n text
     const topText = language === "ar" ? "دافورلانس" : "DafourLance";
