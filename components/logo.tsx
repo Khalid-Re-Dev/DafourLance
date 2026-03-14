@@ -22,8 +22,8 @@ export default function Logo({ variant = "header", className = "" }: LogoProps) 
     // Colors based on variant
     const iconDarkColor = isFooter ? "#ffffff" : "#1d2a3a";
     const iconAccentColor = "#f3825a";
-    const primaryTextColor = isFooter ? "#ffffff" : "#1d2a3a";
-    const secondaryTextColor = "#fe6a52";
+    const primaryTextColor = "#f3825a";
+    const secondaryTextColor = isFooter ? "#ffffff" : "#1d2a3a";
 
     // i18n text
     const topText = language === "ar" ? "دافورلانس" : "DafourLance";
