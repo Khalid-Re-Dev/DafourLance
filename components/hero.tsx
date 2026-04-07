@@ -46,10 +46,10 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            {/* Orange curved dashed border */}
+            {/* Orange curved dashed border — tight elegant gap around the image */}
             <svg
               viewBox="0 0 400 420"
-              className={`absolute ${isRTL ? "-right-8" : "-left-8"} -top-8 w-[380px] h-[400px] lg:w-[450px] lg:h-[470px]`}
+              className={`absolute ${isRTL ? "-right-3" : "-left-3"} -top-3 w-[300px] h-[350px] lg:w-[365px] lg:h-[425px]`}
               fill="none"
             >
               <motion.path
@@ -64,9 +64,9 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
               />
             </svg>
 
-            {/* Main Image */}
+            {/* Main Image — enlarged for better presence */}
             <motion.div
-              className="relative z-10 bg-[#f5bc41] rounded-[32px] overflow-hidden w-[260px] h-[300px] lg:w-[320px] lg:h-[380px] shadow-2xl"
+              className="relative z-10 bg-[#f5bc41] rounded-[32px] overflow-hidden w-[280px] h-[330px] lg:w-[340px] lg:h-[400px] shadow-2xl"
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
@@ -81,9 +81,9 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
               />
             </motion.div>
 
-            {/* Floating Elements Icons */}
+            {/* Floating Elements Icons — repositioned for balance */}
             <motion.div
-              className={`absolute top-8 ${isRTL ? "right-12 lg:right-4" : "left-12 lg:left-4"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
+              className={`absolute top-4 ${isRTL ? "right-8 lg:right-2" : "left-8 lg:left-2"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.6, type: "spring", stiffness: 200 }}
@@ -95,7 +95,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
             </motion.div>
 
             <motion.div
-              className={`absolute bottom-24 ${isRTL ? "left-4 lg:-left-4" : "right-4 lg:-right-4"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
+              className={`absolute bottom-16 ${isRTL ? "left-6 lg:left-0" : "right-6 lg:right-0"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
               initial={{ scale: 0, rotate: 180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
@@ -116,7 +116,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
             </motion.div>
 
             <motion.div
-              className={`absolute top-36 ${isRTL ? "left-8 lg:left-0" : "right-8 lg:right-0"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
+              className={`absolute top-28 ${isRTL ? "left-4 lg:-left-2" : "right-4 lg:-right-2"} bg-background rounded-full p-3 shadow-xl z-20 border border-border`}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 1, type: "spring", stiffness: 200 }}
