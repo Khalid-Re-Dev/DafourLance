@@ -144,7 +144,7 @@ export default function Services({ siteTexts = {} }: ServicesProps) {
   }
 
   return (
-    <section id="services" className="py-20 lg:py-28 bg-[#f9fafb]">
+    <section id="services" className="py-14 lg:py-20 bg-[#f9fafb]">
       <div className="max-w-7xl mx-auto px-6 lg:px-16">
         <motion.div
           className="text-center mb-14 lg:mb-16"

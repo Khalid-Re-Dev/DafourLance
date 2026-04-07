@@ -119,7 +119,7 @@ export default function Footer({
 
   return (
     <footer
-      className="bg-[#1f2b3b] text-white py-16 lg:py-20"
+      className="bg-[#1f2b3b] text-white py-12 lg:py-16"
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12">

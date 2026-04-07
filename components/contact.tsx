@@ -66,7 +66,7 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
   }
 
   return (
-    <section id="contact" className="py-16 lg:py-24 bg-gradient-to-b from-[#fbd8cc] via-[#fce8e2] to-[#fef6f3]">
+    <section id="contact" className="py-14 lg:py-20 bg-gradient-to-b from-[#fbd8cc] via-[#fce8e2] to-[#fef6f3]">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <motion.div
           className={`mb-12 ${isRTL ? "text-right" : "text-left"}`}

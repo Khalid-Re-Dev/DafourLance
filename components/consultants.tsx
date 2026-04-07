@@ -224,7 +224,7 @@ export default function Consultants({ consultants = [], siteTexts = {} }: Consul
   return (
     <section
       id="consultants"
-      className="py-20 lg:py-28"
+      className="py-14 lg:py-20"
       style={{ background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 50%, #f0f1f3 100%)" }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-16">

@@ -52,7 +52,7 @@ export default function Projects({ projects, siteTexts }: ProjectsProps) {
 
   return (
     // ✅ تمت إعادة الخلفية الحمراء الخفيفة جداً واللطيفة لتمييز القسم
-    <section id="projects" className="py-20 bg-[#fef2ee] overflow-hidden">
+    <section id="projects" className="py-14 lg:py-20 bg-[#fef2ee] overflow-hidden">
       <div className="container mx-auto px-4">
         
         {/* ✅ العناوين موسطة تماماً وبنفس ستايل قسم الاستشاريين */}

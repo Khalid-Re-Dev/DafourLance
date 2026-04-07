@@ -227,7 +227,7 @@ export default function About({ siteTexts = {} }: AboutProps) {
   return (
     <section 
       id="about" 
-      className="py-20 lg:py-28 bg-[#f9fafb] relative overflow-hidden"
+      className="py-14 lg:py-20 bg-[#f9fafb] relative overflow-hidden"
       dir={isRTL ? "rtl" : "ltr"} // هذا السطر هو مفتاح الحل
     >
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#fe6a52]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -235,7 +235,7 @@ export default function About({ siteTexts = {} }: AboutProps) {
 
       <div className="max-w-7xl mx-auto px-6 lg:px-16 relative z-10">
         <motion.div
-          className="max-w-3xl mb-16 lg:mb-20 mx-auto text-center"
+          className="max-w-3xl mb-10 lg:mb-14 mx-auto text-center"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
