@@ -2,17 +2,40 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
+import { getSession } from "@/lib/auth"
+
+/** Mask an API key for safe display: sk-proj-****...xxxx */
+function maskApiKey(key: string): string {
+    if (key.length <= 11) return key.slice(0, 3) + "****"
+    return key.slice(0, 7) + "****..." + key.slice(-4)
+}
 
 export async function getSettings() {
+    const session = await getSession()
+    if (!session) {
+        throw new Error("Unauthorized")
+    }
+
     const settings = await prisma.systemSettings.upsert({
         where: { id: "singleton" },
         update: {},
         create: { id: "singleton" },
     })
-    return settings
+
+    // Return masked key only — never expose the full key to the client
+    return {
+        ...settings,
+        openAiKey: settings.openAiKey ? maskApiKey(settings.openAiKey) : null,
+        hasKey: !!settings.openAiKey,
+    }
 }
 
 export async function saveOpenAiKey(key: string) {
+    const session = await getSession()
+    if (!session) {
+        return { success: false, error: "Unauthorized" }
+    }
+
     const trimmed = key.trim()
 
     if (!trimmed) {
@@ -38,6 +61,11 @@ export async function saveOpenAiKey(key: string) {
 }
 
 export async function deleteOpenAiKey() {
+    const session = await getSession()
+    if (!session) {
+        return { success: false, error: "Unauthorized" }
+    }
+
     try {
         await prisma.systemSettings.upsert({
             where: { id: "singleton" },

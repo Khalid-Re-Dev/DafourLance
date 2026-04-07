@@ -1,37 +1,8 @@
-import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { Users, FolderKanban, Handshake, Navigation, FileText, ArrowRight } from "lucide-react"
 import prisma from "@/lib/db"
-
-async function checkAuth() {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get("admin_session")
-
-  if (!sessionCookie?.value) {
-    return null
-  }
-
-  try {
-    const [, encodedData] = sessionCookie.value.split(".")
-    if (!encodedData) return null
-
-    const sessionData = JSON.parse(Buffer.from(encodedData, "base64").toString())
-
-    if (Date.now() - sessionData.createdAt > 24 * 60 * 60 * 1000) {
-      return null
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: sessionData.userId },
-      select: { id: true, email: true, name: true },
-    })
-
-    return user
-  } catch {
-    return null
-  }
-}
+import { getSession } from "@/lib/auth"
 
 async function getStats() {
   const [consultantsCount, projectsCount, partnersCount, navItemsCount] = await Promise.all([
@@ -45,7 +16,7 @@ async function getStats() {
 }
 
 export default async function AdminDashboard() {
-  const session = await checkAuth()
+  const session = await getSession()
   
   if (!session) {
     redirect("/admin/login")

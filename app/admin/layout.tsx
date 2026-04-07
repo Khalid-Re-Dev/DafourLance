@@ -1,6 +1,5 @@
 import type React from "react"
-import { cookies } from "next/headers"
-import prisma from "@/lib/db"
+import { getSession } from "@/lib/auth"
 import AdminSidebar from "@/components/admin/sidebar"
 import AdminTopbar from "@/components/admin/topbar"
 
@@ -9,41 +8,12 @@ export const metadata = {
   description: "Manage your DaforLance website content",
 }
 
-async function getSessionFromCookie() {
-  try {
-    const cookieStore = await cookies()
-    const sessionCookie = cookieStore.get("admin_session")
-
-    if (!sessionCookie?.value) {
-      return null
-    }
-
-    const [, encodedData] = sessionCookie.value.split(".")
-    if (!encodedData) return null
-
-    const sessionData = JSON.parse(Buffer.from(encodedData, "base64").toString())
-
-    if (Date.now() - sessionData.createdAt > 24 * 60 * 60 * 1000) {
-      return null
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: sessionData.userId },
-      select: { id: true, email: true, name: true },
-    })
-
-    return user
-  } catch {
-    return null
-  }
-}
-
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await getSessionFromCookie()
+  const session = await getSession()
 
   // إذا لم يكن هناك session، اعرض المحتوى بدون الـ dashboard wrapper
   // هذا يسمح لصفحة login بالعمل بشكل صحيح

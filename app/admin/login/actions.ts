@@ -3,53 +3,47 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/db"
-
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password + (process.env.AUTH_SECRET || "default-secret"))
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-}
-
-async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  const hashed = await hashPassword(password)
-  return hashed === hashedPassword || hashedPassword === "69e38a0d77e7d296e1ef53fbee41fe5881d6aab722fdafd840c1bc7c897b88a7"
-}
-
-async function createSession(userId: string): Promise<string> {
-  const sessionId = crypto.randomUUID()
-  const sessionData = JSON.stringify({ userId, sessionId, createdAt: Date.now() })
-  const encoder = new TextEncoder()
-  const data = encoder.encode(sessionData)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const token =
-    hashArray.map((b) => b.toString(16).padStart(2, "0")).join("") + "." + Buffer.from(sessionData).toString("base64")
-  return token
-}
+import {
+  verifyPassword,
+  migratePasswordToBcrypt,
+  createSession,
+} from "@/lib/auth"
 
 export async function loginAction(formData: FormData) {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
+  const email = (formData.get("email") as string) || ""
+  const password = (formData.get("password") as string) || ""
 
   if (!email || !password) {
     return { error: "Email and password are required", success: false }
   }
 
   try {
+    console.log("LOGIN_DEBUG: Attempting login for email:", email)
+    
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase().trim() },
     })
 
     if (!user) {
-      return { error: "Invalid email", success: false }
+      console.log("LOGIN_DEBUG: User not found in database for email:", email)
+      return { error: "Invalid credentials", success: false }
     }
 
+    console.log("LOGIN_DEBUG: User found:", user.email)
+    console.log("LOGIN_DEBUG: Stored hash starts with:", user.password.substring(0, 10))
+    
     const isValid = await verifyPassword(password, user.password)
-    const hashedPassword = await hashPassword(password)
+    console.log("LOGIN_DEBUG: Verification result:", isValid)
+
     if (!isValid) {
-      return { error: "Invalid password", success: false, upw: user.password, pw:password, pwhash: hashedPassword }
+      console.log("LOGIN_DEBUG: Password mismatch for user:", email)
+      return { error: "Invalid credentials", success: false }
+    }
+
+    // Migrate legacy SHA-256 hash to bcrypt on successful login
+    if (!user.password.startsWith("$2a$") && !user.password.startsWith("$2b$")) {
+      console.log("LOGIN_DEBUG: Migrating legacy hash to bcrypt")
+      await migratePasswordToBcrypt(user.id, password)
     }
 
     const token = await createSession(user.id)
@@ -62,9 +56,10 @@ export async function loginAction(formData: FormData) {
       path: "/",
     })
 
+    console.log("LOGIN_DEBUG: Login successful for:", email)
     return { success: true }
   } catch (error) {
-    console.error("Login error:", error)
+    console.error("LOGIN_DEBUG: Login error exception:", error)
     return { error: "An error occurred during login", success: false }
   }
 }

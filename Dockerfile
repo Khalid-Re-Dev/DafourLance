@@ -47,6 +47,10 @@ FROM node:20 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+# WARNING: In production (e.g., CapRover or Docker), local image uploads saved to public/uploads 
+# will be lost when the container restarts or rebuilds. 
+# You MUST mount a persistent volume to /app/public/uploads in your deployment settings.
+
 COPY --from=builder /app ./
 
 EXPOSE 3000

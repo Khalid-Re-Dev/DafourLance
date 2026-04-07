@@ -1,44 +1,25 @@
 const { PrismaClient } = require("@prisma/client")
 const bcrypt = require("bcryptjs")
-const crypto = require("crypto")
 
 const prisma = new PrismaClient()
-
-// function hashPassword(password) {
-//   const data = password + (process.env.AUTH_SECRET || "default-secret")
-//   return crypto
-//     .createHash("sha256")
-//     .update(data)
-//     .digest("hex")
-// }
-
-
-async function hashPassword(password) {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password + (process.env.AUTH_SECRET || "default-secret"))
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-}
 
 async function main() {
   console.log("Starting database seed...")
 
-  const hashedPassword = await hashPassword("Admin123!")
+  const hashedPassword = await bcrypt.hash("Admin123!", 12)
 
   await prisma.user.upsert({
-    where: { email: "dadmin@daforlance.com" },
+    where: { email: "admin@daforlance.com" },
     update: {},
     create: {
       email: "admin@daforlance.com",
-      password: "69e38a0d77e7d296e1ef53fbee41fe5881d6aab722fdafd840c1bc7c897b88a7",
+      password: hashedPassword,
       name: "Super Admin",
       role: "admin",
     },
   })
 
-  console.log(hashedPassword)
-  console.log("Admin created successfully")
+  console.log("Admin user created/verified successfully")
 }
 
 main()

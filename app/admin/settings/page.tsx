@@ -18,16 +18,11 @@ import {
 import { toast } from "sonner"
 import { getSettings, saveOpenAiKey, deleteOpenAiKey } from "./actions"
 
-/** Mask a key like sk-proj-abc...xyz → sk-••••••••xyz */
-function maskKey(key: string) {
-  if (key.length <= 7) return "sk-••••••••"
-  return key.slice(0, 3) + "••••••••" + key.slice(-4)
-}
-
 export default function SettingsPage() {
   // ─── state ───────────────────────────────────────
-  const [apiKey, setApiKey] = useState("")
-  const [savedKey, setSavedKey] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState("")          // new key being entered
+  const [maskedKey, setMaskedKey] = useState<string | null>(null) // masked display value from server
+  const [hasKey, setHasKey] = useState(false)        // whether a key is configured
   const [showKey, setShowKey] = useState(false)
   const [loading, setLoading] = useState(true)
   const [isSaving, startSaveTransition] = useTransition()
@@ -37,11 +32,12 @@ export default function SettingsPage() {
   useEffect(() => {
     getSettings()
       .then((s) => {
-        if (s.openAiKey) {
-          setSavedKey(s.openAiKey)
-          setApiKey(s.openAiKey)
+        if (s.hasKey && s.openAiKey) {
+          setMaskedKey(s.openAiKey) // this is the masked version
+          setHasKey(true)
         }
       })
+      .catch(() => { /* auth redirect will handle it */ })
       .finally(() => setLoading(false))
   }, [])
 
@@ -51,7 +47,11 @@ export default function SettingsPage() {
       const res = await saveOpenAiKey(apiKey)
       if (res.success) {
         toast.success("API key saved successfully")
-        setSavedKey(apiKey)
+        // Re-fetch to get the newly masked value
+        const updated = await getSettings()
+        setMaskedKey(updated.openAiKey)
+        setHasKey(true)
+        setApiKey("")
         setShowKey(false)
       } else {
         toast.error(res.error ?? "Failed to save key")
@@ -64,7 +64,8 @@ export default function SettingsPage() {
       const res = await deleteOpenAiKey()
       if (res.success) {
         toast.success("API key removed")
-        setSavedKey(null)
+        setMaskedKey(null)
+        setHasKey(false)
         setApiKey("")
         setShowKey(false)
       } else {
@@ -73,7 +74,7 @@ export default function SettingsPage() {
     })
   }
 
-  const hasUnsavedChanges = apiKey !== (savedKey ?? "")
+  const hasUnsavedChanges = apiKey.trim().length > 0
 
   // ─── render ──────────────────────────────────────
   return (
@@ -119,10 +120,10 @@ export default function SettingsPage() {
               ) : (
                 <>
                   {/* Status badge */}
-                  {savedKey && (
+                  {hasKey && (
                     <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg w-fit">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      Key configured
+                      Key configured {maskedKey && <span className="text-emerald-500 font-mono">({maskedKey})</span>}
                     </div>
                   )}
 
@@ -130,7 +131,7 @@ export default function SettingsPage() {
                   <div className="relative">
                     <input
                       type={showKey ? "text" : "password"}
-                      value={showKey ? apiKey : apiKey ? maskKey(apiKey) : ""}
+                      value={apiKey}
                       onChange={(e) => {
                         if (!showKey) setShowKey(true)
                         setApiKey(e.target.value)
@@ -138,7 +139,7 @@ export default function SettingsPage() {
                       onFocus={() => {
                         if (!showKey && apiKey) setShowKey(true)
                       }}
-                      placeholder="sk-proj-…"
+                      placeholder={hasKey ? "Enter new key to replace…" : "sk-proj-…"}
                       className="w-full h-11 rounded-xl border border-[#e5e7eb] bg-[#f9fafb] px-4 pr-12 text-sm text-[#1f2b3b] placeholder:text-[#9ca3af] outline-none transition-all focus:border-[#fe6a52] focus:ring-2 focus:ring-[#fe6a52]/20 font-mono"
                     />
                     <button
@@ -170,7 +171,7 @@ export default function SettingsPage() {
                       {isSaving ? "Saving…" : "Save Key"}
                     </button>
 
-                    {savedKey && (
+                    {hasKey && (
                       <button
                         onClick={handleDelete}
                         disabled={isDeleting}

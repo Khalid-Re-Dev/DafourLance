@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { useLanguage } from "@/lib/i18n/language-context"
+import ConsultantDetailModal from "@/components/consultant-detail-modal"
 
 interface CMSConsultant {
   id: string
@@ -41,6 +42,7 @@ function ConsultantCard({
   consultant,
   language,
   t,
+  onViewDetails,
 }: {
   consultant: {
     name: string
@@ -50,6 +52,7 @@ function ConsultantCard({
   }
   language: "ar" | "en"
   t: any
+  onViewDetails: () => void
 }) {
   const [isButtonHovered, setIsButtonHovered] = useState(false)
   const [isCardHovered, setIsCardHovered] = useState(false)
@@ -122,6 +125,10 @@ function ConsultantCard({
           className="w-full flex justify-center"
         >
           <motion.button
+            onClick={(e) => {
+              e.stopPropagation()
+              onViewDetails()
+            }}
             className="relative mt-4 w-full max-w-[180px] py-2.5 bg-[#fe6a52] text-white text-sm font-semibold rounded-full shadow-md overflow-hidden"
             onHoverStart={() => setIsButtonHovered(true)}
             onHoverEnd={() => setIsButtonHovered(false)}
@@ -148,21 +155,26 @@ function ConsultantCard({
 
 export default function Consultants({ consultants = [], siteTexts = {} }: ConsultantsProps) {
   const [activeSlide, setActiveSlide] = useState(0)
+  const [selectedConsultant, setSelectedConsultant] = useState<CMSConsultant | null>(null)
   const { t, language } = useLanguage()
 
-  const displayConsultants =
-    consultants.length > 0
-      ? consultants.map((c) => ({
-          name: language === "ar" ? c.nameAr : c.nameEn,
-          role: language === "ar" ? c.roleAr : c.roleEn,
-          description: language === "ar" ? c.descriptionAr || "" : c.descriptionEn || "",
-          imageUrl: c.imageUrl,
-        }))
-      : fallbackConsultantData[language].map((c) => ({
-          ...c,
-          description: t.consultants.cardDescription,
-          imageUrl: null,
-        }))
+  // Keep the full CMS objects for the modal, build display objects for the cards
+  const hasCMSData = consultants.length > 0
+
+  const displayConsultants = hasCMSData
+    ? consultants.map((c) => ({
+        id: c.id,
+        name: language === "ar" ? c.nameAr : c.nameEn,
+        role: language === "ar" ? c.roleAr : c.roleEn,
+        description: language === "ar" ? c.descriptionAr || "" : c.descriptionEn || "",
+        imageUrl: c.imageUrl,
+      }))
+    : fallbackConsultantData[language].map((c, i) => ({
+        id: `fallback-${i}`,
+        ...c,
+        description: t.consultants.cardDescription,
+        imageUrl: null,
+      }))
 
   const sectionTitle = siteTexts["consultants.main"]
     ? language === "ar"
@@ -203,6 +215,12 @@ export default function Consultants({ consultants = [], siteTexts = {} }: Consul
     },
   }
 
+  function handleViewDetails(index: number) {
+    if (hasCMSData && consultants[index]) {
+      setSelectedConsultant(consultants[index])
+    }
+  }
+
   return (
     <section
       id="consultants"
@@ -229,8 +247,13 @@ export default function Consultants({ consultants = [], siteTexts = {} }: Consul
           viewport={{ once: true, margin: "-50px" }}
         >
           {displayConsultants.slice(0, 4).map((consultant, index) => (
-            <motion.div key={index} variants={cardVariants}>
-              <ConsultantCard consultant={consultant} language={language} t={t} />
+            <motion.div key={consultant.id} variants={cardVariants}>
+              <ConsultantCard
+                consultant={consultant}
+                language={language}
+                t={t}
+                onViewDetails={() => handleViewDetails(index)}
+              />
             </motion.div>
           ))}
         </motion.div>
@@ -256,6 +279,13 @@ export default function Consultants({ consultants = [], siteTexts = {} }: Consul
           ))}
         </motion.div>
       </div>
+
+      {/* Consultant Detail Modal */}
+      <ConsultantDetailModal
+        consultant={selectedConsultant}
+        isOpen={!!selectedConsultant}
+        onClose={() => setSelectedConsultant(null)}
+      />
     </section>
   )
 }
