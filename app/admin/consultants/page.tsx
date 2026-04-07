@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import DataTable from "@/components/admin/data-table"
 import FormModal from "@/components/admin/form-modal"
 import BilingualInput from "@/components/admin/bilingual-input"
+import ImageUpload from "@/components/admin/image-upload"
 import { getConsultants, createConsultant, updateConsultant, deleteConsultant, toggleConsultantActive } from "./actions"
 
 interface Consultant {
@@ -238,15 +239,12 @@ export default function ConsultantsPage() {
             multiline
           />
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-[#374151]">Image URL</Label>
-            <Input
-              value={form.imageUrl}
-              onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-              placeholder="https://example.com/image.jpg"
-              className="border-[#e5e7eb] focus:border-[#fe6a52] focus:ring-[#fe6a52]/20"
-            />
-          </div>
+          <ImageUpload
+            value={form.imageUrl}
+            onChange={(url) => setForm({ ...form, imageUrl: url as string })}
+            label="Consultant Photo"
+            category="consultants"
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

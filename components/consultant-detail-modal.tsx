@@ -128,7 +128,7 @@ export default function ConsultantDetailModal({
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.15, type: "spring", stiffness: 300 }}
-                  className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] rounded-[22px] border-4 border-white shadow-xl overflow-hidden bg-[#1f2b3b] flex items-center justify-center"
+                  className="w-[150px] h-[150px] md:w-[180px] md:h-[180px] rounded-[24px] border-4 border-white shadow-xl overflow-hidden bg-[#1f2b3b] flex items-center justify-center"
                 >
                   {consultant.imageUrl ? (
                     <img
@@ -145,7 +145,7 @@ export default function ConsultantDetailModal({
 
             {/* ── Body ── */}
             <div
-              className={`flex-1 overflow-y-auto pt-[70px] md:pt-[80px] pb-8 px-6 md:px-8 ${
+              className={`flex-1 overflow-y-auto pt-[90px] md:pt-[105px] pb-8 px-6 md:px-8 ${
                 isRTL ? "text-right" : "text-left"
               }`}
             >

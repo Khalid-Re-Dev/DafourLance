@@ -82,7 +82,7 @@ function ConsultantCard({
 
       <div className="absolute left-1/2 -translate-x-1/2 z-10" style={{ top: "18%" }}>
         <motion.div
-          className="bg-[#1f2b3b] flex items-center justify-center border-[3px] border-white w-[130px] h-[130px] rounded-[20px] shadow-[0_8px_25px_rgba(0,0,0,0.25)] overflow-hidden"
+          className="bg-[#1f2b3b] flex items-center justify-center border-[3px] border-white w-[160px] h-[160px] rounded-[22px] shadow-[0_8px_25px_rgba(0,0,0,0.25)] overflow-hidden"
           whileHover={{ scale: 1.03 }}
           transition={{ type: "spring", stiffness: 400, damping: 15 }}
         >
