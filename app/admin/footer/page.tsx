@@ -63,6 +63,8 @@ export default function FooterManagementPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
 
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
     loadData()
   }, [])
@@ -92,12 +94,17 @@ export default function FooterManagementPage() {
 
   async function handleSubmit() {
     setIsLoading(true)
+    setError(null)
     try {
-      await updateFooterConfig(form)
-      setIsSaved(true)
-      setTimeout(() => setIsSaved(false), 3000)
-    } catch (error) {
-      console.error("Error saving footer config:", error)
+      const result = await updateFooterConfig(form)
+      if (result && "success" in result && !result.success) {
+        setError(result.error || "Failed to save")
+      } else {
+        setIsSaved(true)
+        setTimeout(() => setIsSaved(false), 3000)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
     }
     setIsLoading(false)
   }
@@ -126,6 +133,14 @@ export default function FooterManagementPage() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+          <span className="font-medium">Error:</span> {error}
+          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
+        </div>
+      )}
 
       {/* Contact Information Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-[#e5e7eb] p-6 space-y-6">

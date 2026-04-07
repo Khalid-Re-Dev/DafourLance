@@ -34,6 +34,23 @@ const sections = [
   { id: "footer", label: "Footer Section", keys: ["footer.main"] },
 ]
 
+const keyLabels: Record<string, string> = {
+  "hero.title": "Main Title",
+  "hero.description": "Description",
+  "hero.cta": "Call to Action Buttons",
+  "about.main": "Main Content",
+  "about.vision": "Vision",
+  "about.mission": "Mission",
+  "about.goals": "Goals",
+  "about.values": "Values",
+  "services.main": "Main Content",
+  "consultants.main": "Main Content",
+  "projects.main": "Main Content",
+  "partners.main": "Main Content",
+  "contact.main": "Main Content",
+  "footer.main": "Main Content",
+}
+
 export default function ContentPage() {
   const [siteTexts, setSiteTexts] = useState<SiteText[]>([])
   const [expandedSections, setExpandedSections] = useState<string[]>(["hero"])
@@ -159,8 +176,7 @@ export default function ContentPage() {
                       <div key={key} className="space-y-4 pb-6 border-b border-[#f3f4f6] last:border-0 last:pb-0">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="font-medium text-[#1f2b3b]">{key.split(".")[1]?.toUpperCase() || key}</h3>
-                            <code className="text-xs text-[#9ca3af]">{key}</code>
+                            <h3 className="font-medium text-[#1f2b3b]">{keyLabels[key] || key}</h3>
                           </div>
                           {hasEdits && (
                             <Button

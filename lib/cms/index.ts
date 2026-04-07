@@ -10,6 +10,15 @@ export async function getConsultants() {
   } catch { return [] }
 }
 
+// جلب إعدادات الفوتر
+export async function getFooterConfig() {
+  try {
+    return await prisma.footerConfig.findFirst({
+      where: { isActive: true },
+    })
+  } catch { return null }
+}
+
 // جلب المشاريع (محدث لجلب كافة الحقول الجديدة)
 export async function getProjects() {
   try {

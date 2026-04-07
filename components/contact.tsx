@@ -12,9 +12,15 @@ import { submitContactForm } from "@/app/actions/submit-contact"
 
 interface ContactProps {
   siteTexts?: Record<string, any>
+  footerConfig?: {
+    phone?: string | null
+    phone2?: string | null
+    email?: string | null
+    whatsapp?: string | null
+  } | null
 }
 
-export default function Contact({ siteTexts = {} }: ContactProps) {
+export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) {
   const { t, isRTL, language } = useLanguage()
   const [focusedField, setFocusedField] = useState<string | null>(null)
   
@@ -30,9 +36,9 @@ export default function Contact({ siteTexts = {} }: ContactProps) {
     : t.contact.title
 
   const contactItems = [
-    { icon: Phone, title: t.contact.callNow, value: "+967 777000000", color: "bg-[#fe6a52]" },
-    { icon: MessageCircle, title: t.contact.whatsapp, value: "+967 777000000", color: "bg-[#25d366]" },
-    { icon: Mail, title: t.contact.email, value: "email@email.com", color: "bg-[#fe6a52]" },
+    { icon: Phone, title: t.contact.callNow, value: footerConfig?.phone || "+967 777000000", color: "bg-[#fe6a52]" },
+    { icon: MessageCircle, title: t.contact.whatsapp, value: footerConfig?.whatsapp || "+967 777000000", color: "bg-[#25d366]" },
+    { icon: Mail, title: t.contact.email, value: footerConfig?.email || "email@email.com", color: "bg-[#fe6a52]" },
   ]
 
   const getInputClass = (fieldName: string) =>

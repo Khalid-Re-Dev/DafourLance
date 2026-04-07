@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
+import { getSession } from "@/lib/auth"
 
 export async function getFooterConfig() {
   try {
@@ -49,6 +50,12 @@ export async function updateFooterConfig(data: {
   copyrightAr?: string
   copyrightEn?: string
 }) {
+  // Auth guard
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     let config = await prisma.footerConfig.findFirst({
       where: { isActive: true },
@@ -70,9 +77,12 @@ export async function updateFooterConfig(data: {
 
     revalidatePath("/admin/footer")
     revalidatePath("/")
-    return config
+    return { success: true, data: config }
   } catch (error) {
     console.error("Error updating footer config:", error)
-    throw error
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to save footer config",
+    }
   }
 }

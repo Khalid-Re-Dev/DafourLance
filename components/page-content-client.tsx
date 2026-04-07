@@ -18,6 +18,7 @@ interface PageContentClientProps {
   partners: any[]
   navItems: any[]
   siteTexts: Record<string, any>
+  footerConfig: any
 }
 
 export default function PageContentClient({
@@ -26,6 +27,7 @@ export default function PageContentClient({
   partners,
   navItems,
   siteTexts,
+  footerConfig,
 }: PageContentClientProps) {
   const { isRTL, language } = useLanguage()
 
@@ -43,8 +45,8 @@ export default function PageContentClient({
       <Consultants consultants={consultants} siteTexts={siteTexts} />
       <Projects projects={projects} siteTexts={siteTexts} />
       <Partners partners={partners} siteTexts={siteTexts} />
-      <Contact siteTexts={siteTexts} />
-      <Footer siteTexts={siteTexts} />
+      <Contact siteTexts={siteTexts} footerConfig={footerConfig} />
+      <Footer siteTexts={siteTexts} footerConfig={footerConfig} />
     </main>
   )
 }
