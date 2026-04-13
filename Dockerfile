@@ -1,58 +1,48 @@
-# # Stage 1: Install dependencies
-# FROM node:20 AS deps
-# WORKDIR /app
-# COPY package.json package-lock.json* pnpm-lock.yaml* ./
-# RUN npm install
-# # or if you use pnpm: RUN npm install -g pnpm && pnpm install
+# =========================
+# Stage 1: Dependencies
+# =========================
+FROM node:20-alpine AS deps
 
-# # Stage 2: Build and generate Prisma client 
-# FROM node:20 AS builder
-# WORKDIR /app
-# COPY --from=deps /app/node_modules ./node_modules
-# COPY . .
-
-# # Generate Prisma client before building Next.js
-# RUN npx prisma generate
-
-# # Build Next.js app
-# RUN npm run build
-
-# # Stage 3: Production image
-# FROM node:20 AS runner
-# WORKDIR /app
-# ENV NODE_ENV=production
-
-# COPY --from=builder /app ./
-
-# EXPOSE 3002
-# CMD ["npm", "start"]
-
-
-# Stage 1: Install dependencies
-FROM node:20 AS deps
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install
 
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# =========================
 # Stage 2: Build
-FROM node:20 AS builder
+# =========================
+FROM node:20-alpine AS builder
+
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Generate Prisma client
 RUN npx prisma generate
+
+# Build app
 RUN npm run build
 
+# Remove dev dependencies AFTER build
+RUN npm prune --omit=dev
+
+# =========================
 # Stage 3: Production
-FROM node:20 AS runner
+# =========================
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 ENV NODE_ENV=production
 
-# WARNING: In production (e.g., CapRover or Docker), local image uploads saved to public/uploads 
-# will be lost when the container restarts or rebuilds. 
-# You MUST mount a persistent volume to /app/public/uploads in your deployment settings.
-
-COPY --from=builder /app ./
+# Copy only what is needed
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next   # if Next.js
+COPY --from=builder /app/dist ./dist     # if using dist
+COPY --from=builder /app/prisma ./prisma # needed for migrations
+COPY --from=builder /app/public ./public # static files
 
 EXPOSE 3000
 
-CMD sh -c "npx prisma migrate deploy && npx prisma db seed && npm start"
+CMD sh -c "npx prisma migrate deploy && npm start"
