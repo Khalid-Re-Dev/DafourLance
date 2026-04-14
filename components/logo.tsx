@@ -11,7 +11,7 @@ interface LogoProps {
  * DafourLance Logo Component
  * - Inline SVG icon (zero network requests, pixel-perfect at any size)
  * - i18n text rendered alongside via Flexbox
- * - DIN Next LT W23 font with Cairo fallback
+ * - Cairo font (loaded via next/font/google)
  * - variant="header" for light backgrounds, variant="footer" for dark
  */
 export default function Logo({ variant = "header", className = "" }: LogoProps) {
@@ -102,7 +102,7 @@ export default function Logo({ variant = "header", className = "" }: LogoProps) 
                 <span
                     className="logo-primary-text"
                     style={{
-                        fontFamily: "'DIN Next LT W23', var(--font-cairo), 'Cairo', sans-serif",
+                        fontFamily: "var(--font-cairo), 'Cairo', sans-serif",
                         fontWeight: 700,
                         fontSize: isFooter ? "28px" : "24px",
                         color: primaryTextColor,
@@ -115,7 +115,7 @@ export default function Logo({ variant = "header", className = "" }: LogoProps) 
                 <span
                     className="logo-secondary-text"
                     style={{
-                        fontFamily: "'DIN Next LT W23', var(--font-cairo), 'Cairo', sans-serif",
+                        fontFamily: "var(--font-cairo), 'Cairo', sans-serif",
                         fontWeight: 400,
                         fontSize: isFooter ? "14px" : "12px",
                         color: secondaryTextColor,
