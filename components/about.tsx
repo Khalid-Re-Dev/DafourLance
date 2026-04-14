@@ -122,7 +122,7 @@ export default function About({ siteTexts = {} }: AboutProps) {
         ? aboutMain.headingAr
         : aboutMain.headingEn
       : language === "ar"
-        ? "من نحن"
+        ? "محمد بن سواد"
         : "About Us",
     description: aboutMain
       ? language === "ar"
@@ -182,19 +182,19 @@ export default function About({ siteTexts = {} }: AboutProps) {
           ? (language === "ar" ? aboutGoals.bodyAr : aboutGoals.bodyEn)?.split("\n") || []
           : language === "ar"
             ? [
-                "تعزيز التعلم المستمر والتطوير المهني",
-                "الحفاظ على أعلى معايير التميز التقني",
-                "المساهمة في التحول الرقمي",
-                "بناء شراكات طويلة الأمد",
-                "تقديم حلول مبتكرة",
-              ]
+              "تعزيز التعلم المستمر والتطوير المهني",
+              "الحفاظ على أعلى معايير التميز التقني",
+              "المساهمة في التحول الرقمي",
+              "بناء شراكات طويلة الأمد",
+              "تقديم حلول مبتكرة",
+            ]
             : [
-                "Promote continuous learning and professional development",
-                "Maintain the highest standards of technical excellence",
-                "Contribute to digital transformation",
-                "Build long-term partnerships",
-                "Deliver innovative solutions",
-              ],
+              "Promote continuous learning and professional development",
+              "Maintain the highest standards of technical excellence",
+              "Contribute to digital transformation",
+              "Build long-term partnerships",
+              "Deliver innovative solutions",
+            ],
       },
       {
         key: "values",
@@ -209,24 +209,24 @@ export default function About({ siteTexts = {} }: AboutProps) {
         values:
           language === "ar"
             ? [
-                { icon: Award, label: "الجودة" },
-                { icon: CheckCircle, label: "الالتزام" },
-                { icon: Users, label: "العمل الجماعي" },
-                { icon: Zap, label: "الابتكار" },
-              ]
+              { icon: Award, label: "الجودة" },
+              { icon: CheckCircle, label: "الالتزام" },
+              { icon: Users, label: "العمل الجماعي" },
+              { icon: Zap, label: "الابتكار" },
+            ]
             : [
-                { icon: Award, label: "Quality" },
-                { icon: CheckCircle, label: "Commitment" },
-                { icon: Users, label: "Teamwork" },
-                { icon: Zap, label: "Innovation" },
-              ],
+              { icon: Award, label: "Quality" },
+              { icon: CheckCircle, label: "Commitment" },
+              { icon: Users, label: "Teamwork" },
+              { icon: Zap, label: "Innovation" },
+            ],
       },
     ],
   }
 
   return (
-    <section 
-      id="about" 
+    <section
+      id="about"
       className="py-14 lg:py-20 bg-[#f9fafb] relative overflow-hidden"
       dir={isRTL ? "rtl" : "ltr"} // هذا السطر هو مفتاح الحل
     >

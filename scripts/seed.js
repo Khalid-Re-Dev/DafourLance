@@ -29,7 +29,7 @@ async function main() {
   console.log("🧭 Seeding navigation items...")
   const navItems = [
     { id: "nav-1", labelAr: "الرئيسية", labelEn: "Home", href: "#", order: 1, isVisible: true, isExternal: false },
-    { id: "nav-2", labelAr: "من نحن", labelEn: "About Us", href: "#about", order: 2, isVisible: true, isExternal: false },
+    { id: "nav-2", labelAr: "محمد بن سواد", labelEn: "About Us", href: "#about", order: 2, isVisible: true, isExternal: false },
     { id: "nav-3", labelAr: "خدماتنا", labelEn: "Services", href: "#services", order: 3, isVisible: true, isExternal: false },
     { id: "nav-4", labelAr: "الاستشاريين", labelEn: "Consultants", href: "#consultants", order: 4, isVisible: true, isExternal: false },
     { id: "nav-5", labelAr: "مشاريعنا", labelEn: "Projects", href: "#projects", order: 5, isVisible: true, isExternal: false },
@@ -53,7 +53,7 @@ async function main() {
     {
       id: "text-hero-title",
       key: "hero.title",
-      headingAr: "نحو تجربة رقمية واحترافية أفضل",
+      headingAr: "محمد بن سواد",
       headingEn: "Towards a Better Digital & Professional Experience",
       bodyAr: "نصمم تجارب مستخدم مبتكرة. نطور مواقع احترافية نقدم استشارات رقمية، وندربك لتطوير مهاراتك التقنية والإبداعية",
       bodyEn: "We design innovative user experiences. We develop professional websites, provide digital consulting, and train you to develop your technical and creative skills",
@@ -78,7 +78,7 @@ async function main() {
     {
       id: "text-about",
       key: "about.main",
-      headingAr: "من نحن",
+      headingAr: "محمد بن سواد",
       headingEn: "About Us",
       bodyAr: "دافور لانس فريق رقمي متخصص في تقديم حلول مبتكرة تمكن الشركات والمشاريع الناشئة من النمو والازدهار في العصر الرقمي.",
       bodyEn: "DaforLance is a digital team specialized in delivering innovative solutions that help companies and startups grow and thrive in the digital era.",

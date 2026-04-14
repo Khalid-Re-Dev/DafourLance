@@ -4,7 +4,7 @@
 -- Seed navigation items
 INSERT INTO NavItem (id, labelAr, labelEn, href, "order", isVisible, isExternal, createdAt, updatedAt) VALUES
 ('nav-1', 'الرئيسية', 'Home', '#', 1, 1, 0, datetime('now'), datetime('now')),
-('nav-2', 'من نحن', 'About Us', '#about', 2, 1, 0, datetime('now'), datetime('now')),
+('nav-2', 'محمد بن سواد', 'About Us', '#about', 2, 1, 0, datetime('now'), datetime('now')),
 ('nav-3', 'خدماتنا', 'Services', '#services', 3, 1, 0, datetime('now'), datetime('now')),
 ('nav-4', 'الاستشاريين', 'Consultants', '#consultants', 4, 1, 0, datetime('now'), datetime('now')),
 ('nav-5', 'مشاريعنا', 'Projects', '#projects', 5, 1, 0, datetime('now'), datetime('now')),
@@ -37,7 +37,7 @@ INSERT INTO SiteText (id, "key", headingAr, headingEn, bodyAr, bodyEn, extraJson
 ('text-hero-title', 'hero.title', 'نحو تجربة رقمية واحترافية أفضل', 'Towards a Better Digital & Professional Experience', NULL, NULL, NULL, datetime('now'), datetime('now')),
 ('text-hero-desc', 'hero.description', NULL, NULL, 'نصمم تجارب مستخدم مبتكرة. نطور مواقع احترافية نقدم استشارات رقمية، وندربك لتطوير مهاراتك التقنية والإبداعية', 'We design innovative user experiences. We develop professional websites, provide digital consulting, and train you to develop your technical and creative skills', NULL, datetime('now'), datetime('now')),
 ('text-hero-cta', 'hero.cta', 'ابدأ مشروعك الآن', 'Start Your Project Now', 'اطلع على خدماتنا', 'View Our Services', NULL, datetime('now'), datetime('now')),
-('text-about', 'about.main', 'من نحن', 'About Us', 'دافور لانس فريق رقمي متخصص في تقديم حلول مبتكرة تمكن الشركات والمشاريع الناشئة من النمو والازدهار في العصر الرقمي.', 'DaforLance is a digital team specialized in delivering innovative solutions that help companies and startups grow and thrive in the digital era.', NULL, datetime('now'), datetime('now')),
+('text-about', 'about.main', 'محمد بن سواد', 'About Us', 'دافور لانس فريق رقمي متخصص في تقديم حلول مبتكرة تمكن الشركات والمشاريع الناشئة من النمو والازدهار في العصر الرقمي.', 'DaforLance is a digital team specialized in delivering innovative solutions that help companies and startups grow and thrive in the digital era.', NULL, datetime('now'), datetime('now')),
 ('text-vision', 'about.vision', 'رؤيتنا', 'Our Vision', 'أن نصبح مزود الحلول الرقمية الرائد في المنطقة، معترفًا به للتميز والابتكار ورضا العملاء.', 'To become the leading digital solutions provider in the region, recognized for excellence, innovation, and customer satisfaction.', NULL, datetime('now'), datetime('now')),
 ('text-mission', 'about.mission', 'رسالتنا', 'Our Mission', 'تقديم حلول رقمية متقدمة تساعد الشركات على تحقيق أهدافها من خلال الابتكار والجودة والتفاني.', 'Delivering advanced digital solutions that help companies achieve their goals through innovation, quality, and dedication.', NULL, datetime('now'), datetime('now')),
 ('text-goals', 'about.goals', 'أهدافنا', 'Our Goals', 'تعزيز التعلم المستمر والتطوير المهني\nالحفاظ على أعلى معايير التميز التقني\nالمساهمة في التحول الرقمي\nبناء شراكات طويلة الأمد\nتقديم حلول مبتكرة', 'Promoting continuous learning and professional development\nMaintaining the highest standards of technical excellence\nContributing to digital transformation\nBuilding long-term partnerships\nDelivering innovative solutions', NULL, datetime('now'), datetime('now')),
