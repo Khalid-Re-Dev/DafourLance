@@ -25,4 +25,8 @@ COPY --from=builder /app ./
 
 EXPOSE 3000
 
+# On container start:
+# 1. Apply any pending database migrations
+# 2. Seed the database with CMS content (uses upsert — safe to re-run)
+# 3. Start the Next.js production server
 CMD sh -c "npx prisma migrate deploy && npx prisma db seed && npm start"
