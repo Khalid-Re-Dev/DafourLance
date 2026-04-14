@@ -23,7 +23,7 @@ interface ContactProps {
 export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) {
   const { t, isRTL, language } = useLanguage()
   const [focusedField, setFocusedField] = useState<string | null>(null)
-  
+
   // حالات الإرسال
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
@@ -42,8 +42,7 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
   ]
 
   const getInputClass = (fieldName: string) =>
-    `rounded-xl border-border bg-background h-12 transition-all duration-300 ${
-      isRTL ? "text-right" : "text-left"
+    `rounded-xl border-border bg-background h-12 transition-all duration-300 ${isRTL ? "text-right" : "text-left"
     } ${focusedField === fieldName ? "border-[#fe6a52] ring-2 ring-[#fe6a52]/20" : ""}`
 
   // دالة معالجة الفورم
@@ -58,12 +57,13 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
     setIsSubmitting(false)
     if (result.success) {
       setSubmitStatus("success")
-      ;(e.target as HTMLFormElement).reset()
+        ; (e.target as HTMLFormElement).reset()
       setTimeout(() => setSubmitStatus("idle"), 5000)
     } else {
       setSubmitStatus("error")
     }
   }
+
 
   return (
     <section id="contact" className="py-14 lg:py-20 bg-gradient-to-b from-[#fbd8cc] via-[#fce8e2] to-[#fef6f3]">
@@ -137,16 +137,15 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
                 name="message"
                 placeholder={t.contact.message}
                 required
-                className={`rounded-xl border-border bg-background min-h-[140px] mb-6 resize-none transition-all duration-300 ${
-                  isRTL ? "text-right" : "text-left"
-                } ${focusedField === "message" ? "border-[#fe6a52] ring-2 ring-[#fe6a52]/20" : ""}`}
+                className={`rounded-xl border-border bg-background min-h-[140px] mb-6 resize-none transition-all duration-300 ${isRTL ? "text-right" : "text-left"
+                  } ${focusedField === "message" ? "border-[#fe6a52] ring-2 ring-[#fe6a52]/20" : ""}`}
                 onFocus={() => setFocusedField("message")}
                 onBlur={() => setFocusedField(null)}
               />
-              
+
               <div className="space-y-4">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button 
+                  <Button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full bg-foreground hover:bg-foreground/90 text-background rounded-full py-6 text-base font-medium relative overflow-hidden group"
@@ -164,12 +163,12 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
                 <AnimatePresence>
                   {submitStatus === "success" && (
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 text-sm font-bold text-center">
-                       {isRTL ? "تم إرسال رسالتك بنجاح!" : "Message sent successfully!"}
+                      {isRTL ? "تم إرسال رسالتك بنجاح!" : "Message sent successfully!"}
                     </motion.p>
                   )}
                   {submitStatus === "error" && (
                     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-600 text-sm font-bold text-center">
-                       {isRTL ? "حدث خطأ أثناء الإرسال" : "Error sending message"}
+                      {isRTL ? "حدث خطأ أثناء الإرسال" : "Error sending message"}
                     </motion.p>
                   )}
                 </AnimatePresence>
