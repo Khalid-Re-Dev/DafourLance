@@ -36,10 +36,28 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
     : t.contact.title
 
   const contactItems = [
-    { icon: Phone, title: t.contact.callNow, value: footerConfig?.phone || "+967 777000000", color: "bg-[#fe6a52]" },
-    { icon: MessageCircle, title: t.contact.whatsapp, value: footerConfig?.whatsapp || "+967 777000000", color: "bg-[#25d366]" },
-    { icon: Mail, title: t.contact.email, value: footerConfig?.email || "email@email.com", color: "bg-[#fe6a52]" },
+    { icon: Phone, type: "phone" as const, title: t.contact.callNow, value: footerConfig?.phone || "+967 777000000", color: "bg-[#fe6a52]" },
+    { icon: MessageCircle, type: "whatsapp" as const, title: t.contact.whatsapp, value: footerConfig?.whatsapp || "+967 777000000", color: "bg-[#25d366]" },
+    { icon: Mail, type: "email" as const, title: t.contact.email, value: footerConfig?.email || "email@email.com", color: "bg-[#fe6a52]" },
   ]
+
+  // دالة توليد رابط التواصل المناسب حسب نوع وسيلة الاتصال
+  function getContactHref(type: "phone" | "whatsapp" | "email", value: string): string {
+    switch (type) {
+      case "phone": {
+        // إزالة المسافات لإنشاء رابط هاتف صالح
+        const cleanPhone = value.replace(/\s+/g, "")
+        return `tel:${cleanPhone}`
+      }
+      case "whatsapp": {
+        // إزالة كل شيء عدا الأرقام وعلامة + لإنشاء رابط واتساب صالح
+        const cleanWhatsapp = value.replace(/[^\d+]/g, "").replace(/^\+/, "")
+        return `https://wa.me/${cleanWhatsapp}`
+      }
+      case "email":
+        return `mailto:${value}`
+    }
+  }
 
   const getInputClass = (fieldName: string) =>
     `rounded-xl border-border bg-background h-12 transition-all duration-300 ${isRTL ? "text-right" : "text-left"
@@ -190,9 +208,12 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
 
             <div className="space-y-6">
               {contactItems.map((item, index) => (
-                <motion.div
+                <motion.a
                   key={index}
-                  className={`flex items-center gap-4 ${isRTL ? "flex-row" : "flex-row-reverse"}`}
+                  href={getContactHref(item.type, item.value)}
+                  target={item.type === "whatsapp" ? "_blank" : undefined}
+                  rel={item.type === "whatsapp" ? "noopener noreferrer" : undefined}
+                  className={`flex items-center gap-4 cursor-pointer no-underline ${isRTL ? "flex-row" : "flex-row-reverse"}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -207,11 +228,11 @@ export default function Contact({ siteTexts = {}, footerConfig }: ContactProps) 
                   </motion.div>
                   <div className={isRTL ? "text-right" : "text-left"}>
                     <p className="font-medium text-foreground">{item.title}</p>
-                    <p className="text-muted-foreground" dir="ltr">
+                    <p className="text-muted-foreground" dir="ltr" style={{ textAlign: isRTL ? "right" : "left" }}>
                       {item.value}
                     </p>
                   </div>
-                </motion.div>
+                </motion.a>
               ))}
             </div>
           </motion.div>
