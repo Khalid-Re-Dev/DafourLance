@@ -15,7 +15,7 @@ const cairo = Cairo({
 })
 
 export const metadata: Metadata = {
-  title: "Dafourlance - محمد بن سواد ",
+  title: "Dafourlance - نحو تجربة رقمية واحترافية أفضل",
   description:
     "نصمم تجارب مستخدم مبتكرة. نطور مواقع احترافية نقدم استشارات رقمية وندربك لتطوير مهاراتك التقنية والإبداعية",
   keywords: ["digital services", "consulting", "web development", "UI/UX design", "خدمات رقمية", "استشارات", "تصميم"],

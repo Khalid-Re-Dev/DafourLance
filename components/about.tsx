@@ -122,7 +122,7 @@ export default function About({ siteTexts = {} }: AboutProps) {
         ? aboutMain.headingAr
         : aboutMain.headingEn
       : language === "ar"
-        ? "محمد بن سواد"
+        ? "من نحن"
         : "About Us",
     description: aboutMain
       ? language === "ar"
