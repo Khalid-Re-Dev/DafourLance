@@ -26,6 +26,10 @@ ENV NODE_ENV=production
 
 COPY --from=builder /app ./
 
+# Declare persistent storage directories
+VOLUME /app/prisma
+VOLUME /app/public/uploads
+
 EXPOSE 3000
 
 # On container start:
