@@ -17,9 +17,12 @@ FROM node:20 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# WARNING: In production (e.g., CapRover or Docker), local image uploads saved to public/uploads 
-# will be lost when the container restarts or rebuilds. 
-# You MUST mount a persistent volume to /app/public/uploads in your deployment settings.
+# WARNING: In production (e.g., CapRover or Docker):
+# 1. Local image uploads saved to public/uploads will be lost on container rebuild.
+#    → Mount a persistent volume to /app/public/uploads
+# 2. SQLite database (prisma/dev.db) will be lost on container rebuild.
+#    → Mount a persistent volume to /app/prisma
+#    Without this, ALL CMS content will be reset on every deploy!
 
 COPY --from=builder /app ./
 
