@@ -173,3 +173,38 @@ model SystemSettings {
   openAiKey String?
   updatedAt DateTime @updatedAt
 }
+
+// 🤖 AI Knowledge Base — dynamic context for the chatbot
+model AiKnowledgeBase {
+  id String @id @default("singleton")
+
+  // About the company
+  aboutAr String @default("")
+  aboutEn String @default("")
+
+  // Services offered
+  servicesAr String @default("")
+  servicesEn String @default("")
+
+  // Features and highlights
+  featuresAr String @default("")
+  featuresEn String @default("")
+
+  // Pricing info (optional)
+  pricingAr String @default("")
+  pricingEn String @default("")
+
+  // FAQ / Common questions
+  faqAr String @default("")
+  faqEn String @default("")
+
+  // Extra custom context (flexible field)
+  extraAr String @default("")
+  extraEn String @default("")
+
+  // AI behavior instructions (appended to system prompt)
+  behaviorInstructionsAr String @default("")
+  behaviorInstructionsEn String @default("")
+
+  updatedAt DateTime @updatedAt
+}

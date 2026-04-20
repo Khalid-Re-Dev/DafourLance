@@ -1,9 +1,12 @@
 import { translations } from "@/lib/i18n/translations"
+import { getAiKnowledgeBase } from "@/lib/cms"
 
 // Static knowledge base builder using the translations and component data
 // This avoids Prisma dependency issues in the v0 preview environment
 
-export function buildKnowledgeBase(language: "ar" | "en"): string {
+export async function buildKnowledgeBase(
+  language: "ar" | "en"
+): Promise<string> {
   const t = translations[language]
   const isArabic = language === "ar"
 
@@ -178,13 +181,56 @@ ${isArabic ? "معلومات التواصل:" : "Contact Information:"}
 ${t.footer.description}
 ${t.footer.copyright}`)
 
-  return sections.join("\n\n")
+  const hardcodedContent = sections.join("\n\n")
+
+  // Fetch dynamic content from DB
+  const dbContent = await getAiKnowledgeBase()
+
+  if (!dbContent) {
+    // DB empty or error — return original content unchanged
+    return hardcodedContent
+  }
+
+  const isAr = language === "ar"
+  const dynamicSections: string[] = []
+
+  // Helper to add section only if it has content
+  const addSection = (titleAr: string, titleEn: string, content: string) => {
+    if (content?.trim()) {
+      dynamicSections.push(
+        `\n## ${isAr ? titleAr : titleEn}\n${content.trim()}`
+      )
+    }
+  }
+
+  addSection("معلومات الشركة", "About the Company",
+    isAr ? dbContent.aboutAr : dbContent.aboutEn)
+
+  addSection("الخدمات المقدمة", "Services Offered",
+    isAr ? dbContent.servicesAr : dbContent.servicesEn)
+
+  addSection("المميزات والميزات", "Features & Highlights",
+    isAr ? dbContent.featuresAr : dbContent.featuresEn)
+
+  addSection("الأسعار", "Pricing",
+    isAr ? dbContent.pricingAr : dbContent.pricingEn)
+
+  addSection("الأسئلة الشائعة", "FAQ",
+    isAr ? dbContent.faqAr : dbContent.faqEn)
+
+  addSection("معلومات إضافية", "Additional Information",
+    isAr ? dbContent.extraAr : dbContent.extraEn)
+
+  // If no dynamic content was added, return original
+  if (dynamicSections.length === 0) return hardcodedContent
+
+  return hardcodedContent + dynamicSections.join("")
 }
 
-export function getSystemPrompt(language: "ar" | "en"): string {
+export async function getSystemPrompt(language: "ar" | "en"): Promise<string> {
   const isArabic = language === "ar"
 
-  return isArabic
+  const basePrompt = isArabic
     ? `أنت المساعد الذكي الرسمي لموقع دافور لانس (DaforLance).
 
 يجب أن تجيب بدقة وحصرياً باستخدام محتوى الموقع المُقدم لك في قسم "CONTEXT" أدناه.
@@ -207,4 +253,13 @@ Never invent services, features, numbers or guarantees that are not explicitly i
 Always respond in the same language as the user's question (Arabic or English).
 
 Be friendly, professional, and concise in your responses.`
+
+  const dbContent = await getAiKnowledgeBase()
+  const instructions = language === "ar"
+    ? dbContent?.behaviorInstructionsAr
+    : dbContent?.behaviorInstructionsEn
+
+  if (!instructions?.trim()) return basePrompt
+
+  return `${basePrompt}\n\n${instructions.trim()}`
 }

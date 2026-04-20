@@ -15,6 +15,7 @@ import {
   Mail,        // تم إضافة استيراد أيقونة الرسائل
   PhoneCall,   // تم إضافة استيراد أيقونة معلومات التواصل
   PanelBottom, // تم إضافة استيراد أيقونة الفوتر
+  Brain,       // أيقونة قاعدة معرفة الذكاء الاصطناعي
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -30,6 +31,7 @@ const navItems = [
   { label: "Messages", href: "/admin/messages", icon: Mail }, 
   { label: "Contact Info", href: "/admin/contact-info", icon: PhoneCall },
   { label: "Footer Settings", href: "/admin/footer", icon: PanelBottom },
+  { label: "AI Knowledge Base", href: "/admin/ai-content", icon: Brain },
   // -----------------------------
 
   { label: "Settings", href: "/admin/settings", icon: Settings },

@@ -82,3 +82,17 @@ export function getLocalized<T extends Record<string, any>>(
   const key = `${field}${language === "ar" ? "Ar" : "En"}`
   return item[key] || item[field] || ""
 }
+
+// ─────────────────────────────────────────
+// AI Knowledge Base
+// ─────────────────────────────────────────
+export async function getAiKnowledgeBase() {
+  try {
+    const record = await prisma.aiKnowledgeBase.findUnique({
+      where: { id: "singleton" },
+    })
+    return record
+  } catch {
+    return null
+  }
+}

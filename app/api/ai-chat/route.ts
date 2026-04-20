@@ -19,8 +19,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const context = buildKnowledgeBase(language)
-    const systemPrompt = getSystemPrompt(language)
+    const [context, systemPrompt] = await Promise.all([
+      buildKnowledgeBase(language),
+      getSystemPrompt(language),
+    ])
 
     const messagesForModel = [
       {
