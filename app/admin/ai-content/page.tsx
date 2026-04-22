@@ -1,4 +1,4 @@
-import { getAiKnowledgeBaseAdmin } from "./actions"
+import { getAiKnowledgeSectionsAdmin, getBehaviorInstructions } from "./actions"
 import AiContentClient from "./ai-content-client"
 
 export const metadata = {
@@ -6,11 +6,14 @@ export const metadata = {
 }
 
 export default async function AiContentPage() {
-  const { data } = await getAiKnowledgeBaseAdmin()
+  const [sections, { data: behaviorData }] = await Promise.all([
+    getAiKnowledgeSectionsAdmin(),
+    getBehaviorInstructions(),
+  ])
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Page Header — same pattern as other admin pages */}
+      {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-[#1f2b3b]">
           AI Knowledge Base
@@ -20,7 +23,10 @@ export default async function AiContentPage() {
         </p>
       </div>
 
-      <AiContentClient initialData={data} />
+      <AiContentClient
+        initialSections={sections}
+        initialBehavior={behaviorData}
+      />
     </div>
   )
 }

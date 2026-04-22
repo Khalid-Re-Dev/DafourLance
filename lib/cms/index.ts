@@ -96,3 +96,16 @@ export async function getAiKnowledgeBase() {
     return null
   }
 }
+
+// ─────────────────────────────────────────
+// AI Knowledge Sections (dynamic CRUD)
+// ─────────────────────────────────────────
+export async function getAiKnowledgeSections() {
+  try {
+    return await prisma.aiKnowledgeSection.findMany({
+      orderBy: { order: "asc" },
+    })
+  } catch {
+    return []
+  }
+}

@@ -1,5 +1,5 @@
 import { translations } from "@/lib/i18n/translations"
-import { getAiKnowledgeBase } from "@/lib/cms"
+import { getAiKnowledgeBase, getAiKnowledgeSections } from "@/lib/cms"
 
 // Static knowledge base builder using the translations and component data
 // This avoids Prisma dependency issues in the v0 preview environment
@@ -221,7 +221,20 @@ ${t.footer.copyright}`)
   addSection("معلومات إضافية", "Additional Information",
     isAr ? dbContent.extraAr : dbContent.extraEn)
 
-  // If no dynamic content was added, return original
+  // If no dynamic content was added from legacy fields, that's okay
+  // We'll still check custom sections below
+
+  // ── Fetch custom dynamic sections (CRUD-managed) ──
+  const customSections = await getAiKnowledgeSections()
+  for (const section of customSections) {
+    const title = isAr ? section.titleAr : section.titleEn
+    const content = isAr ? section.contentAr : section.contentEn
+    if (content?.trim()) {
+      dynamicSections.push(`\n## ${title}\n${content.trim()}`)
+    }
+  }
+
+  // If no dynamic content was added at all, return original
   if (dynamicSections.length === 0) return hardcodedContent
 
   return hardcodedContent + dynamicSections.join("")

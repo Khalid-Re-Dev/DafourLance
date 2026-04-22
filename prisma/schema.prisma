@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -173,7 +173,6 @@ model SystemSettings {
   openAiKey String?
   updatedAt DateTime @updatedAt
 }
-<<<<<<< HEAD
 
 // 🤖 AI Knowledge Base — dynamic context for the chatbot
 model AiKnowledgeBase {
@@ -209,5 +208,16 @@ model AiKnowledgeBase {
 
   updatedAt DateTime @updatedAt
 }
-=======
->>>>>>> ff825141f6c2133847bc9e07ead5bb4a8fc2e07d
+
+// 📦 أقسام قاعدة المعرفة الديناميكية — CRUD
+model AiKnowledgeSection {
+  id        String   @id @default(cuid())
+  icon      String   @default("📌")
+  titleAr   String
+  titleEn   String
+  contentAr String   @default("")
+  contentEn String   @default("")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
