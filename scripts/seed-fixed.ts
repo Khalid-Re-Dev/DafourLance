@@ -10,7 +10,7 @@ async function main() {
   await prisma.navItem.createMany({
     data: [
       { id: "nav-1", labelAr: "الرئيسية", labelEn: "Home", href: "#", order: 1, isVisible: true },
-      { id: "nav-2", labelAr: "محمد بن سواد", labelEn: "About Us", href: "#about", order: 2, isVisible: true },
+      { id: "nav-2", labelAr: "من نحن", labelEn: "About Us", href: "#about", order: 2, isVisible: true },
       { id: "nav-3", labelAr: "خدماتنا", labelEn: "Services", href: "#services", order: 3, isVisible: true },
       { id: "nav-4", labelAr: "الاستشاريين", labelEn: "Consultants", href: "#consultants", order: 4, isVisible: true },
       { id: "nav-5", labelAr: "مشاريعنا", labelEn: "Projects", href: "#projects", order: 5, isVisible: true },
@@ -118,7 +118,7 @@ async function main() {
       {
         id: "text-about",
         key: "about.main",
-        headingAr: "محمد بن سواد",
+        headingAr: "من نحن",
         headingEn: "About Us",
         bodyAr: "دافور لانس فريق رقمي متخصص في تقديم حلول مبتكرة تمكن الشركات والمشاريع الناشئة من النمو والازدهار في العصر الرقمي.",
         bodyEn: "DaforLance is a digital team specialized in delivering innovative solutions that help companies and startups grow and thrive in the digital era.",

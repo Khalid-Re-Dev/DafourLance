@@ -2,94 +2,44 @@
 
 import { motion } from "framer-motion"
 import { useLanguage } from "@/lib/i18n/language-context"
-import { Code2, Palette, Megaphone, GraduationCap, Globe, LineChart } from "lucide-react"
+import * as LucideIcons from "lucide-react"
+import type { LucideIcon } from "lucide-react"
+
+interface ServiceData {
+  id: string
+  icon: string
+  titleAr: string
+  titleEn: string
+  descriptionAr: string | null
+  descriptionEn: string | null
+  order: number
+  isActive: boolean
+  isFeatured: boolean
+}
 
 interface ServicesProps {
   siteTexts?: Record<string, any>
+  services?: ServiceData[]
 }
 
-const servicesData = {
-  ar: [
-    {
-      icon: Code2,
-      title: "تطوير المواقع",
-      description: "نبني مواقع احترافية متجاوبة باستخدام أحدث التقنيات لضمان أداء مثالي وتجربة مستخدم سلسة",
-    },
-    {
-      icon: Palette,
-      title: "تصميم واجهات المستخدم",
-      description: "نصمم واجهات جذابة وسهلة الاستخدام تعكس هوية علامتك التجارية وتحقق أهدافك",
-    },
-    {
-      icon: Megaphone,
-      title: "التسويق الرقمي",
-      description: "استراتيجيات تسويقية متكاملة لزيادة الوعي بعلامتك التجارية والوصول لجمهورك المستهدف",
-    },
-    {
-      icon: GraduationCap,
-      title: "التدريب والتأهيل",
-      description: "برامج تدريبية متخصصة لتطوير مهاراتك التقنية والإبداعية في مجال التقنية",
-    },
-    {
-      icon: Globe,
-      title: "الاستشارات الرقمية",
-      description: "نقدم استشارات متخصصة لمساعدتك في التحول الرقمي واتخاذ القرارات التقنية الصحيحة",
-    },
-    {
-      icon: LineChart,
-      title: "تحليل البيانات",
-      description: "نحلل بياناتك لاستخراج رؤى قيمة تساعدك في اتخاذ قرارات مدروسة وتحسين الأداء",
-    },
-  ],
-  en: [
-    {
-      icon: Code2,
-      title: "Web Development",
-      description:
-        "We build professional responsive websites using the latest technologies to ensure optimal performance and seamless user experience",
-    },
-    {
-      icon: Palette,
-      title: "UI/UX Design",
-      description:
-        "We design attractive and easy-to-use interfaces that reflect your brand identity and achieve your goals",
-    },
-    {
-      icon: Megaphone,
-      title: "Digital Marketing",
-      description: "Integrated marketing strategies to increase brand awareness and reach your target audience",
-    },
-    {
-      icon: GraduationCap,
-      title: "Training & Development",
-      description:
-        "Specialized training programs to develop your technical and creative skills in the technology field",
-    },
-    {
-      icon: Globe,
-      title: "Digital Consulting",
-      description:
-        "We provide specialized consultations to help you with digital transformation and make the right technical decisions",
-    },
-    {
-      icon: LineChart,
-      title: "Data Analytics",
-      description:
-        "We analyze your data to extract valuable insights that help you make informed decisions and improve performance",
-    },
-  ],
+function getIconComponent(name: string): LucideIcon {
+  return (LucideIcons[name as keyof typeof LucideIcons] as LucideIcon) ?? LucideIcons.Sparkles
 }
 
 function ServiceCard({
   service,
   index,
   isRTL,
+  language,
 }: {
-  service: (typeof servicesData.ar)[0]
+  service: ServiceData
   index: number
   isRTL: boolean
+  language: "ar" | "en"
 }) {
-  const Icon = service.icon
+  const Icon = getIconComponent(service.icon)
+  const title = language === "ar" ? service.titleAr : service.titleEn
+  const description = language === "ar" ? (service.descriptionAr || "") : (service.descriptionEn || "")
 
   return (
     <motion.div
@@ -107,14 +57,14 @@ function ServiceCard({
         whileHover={{ scale: 1.05, rotate: 5 }}
         transition={{ type: "spring", stiffness: 400, damping: 15 }}
       >
-        <Icon className="w-7 h-7 lg:w-8 lg:h-8 text-[#fe6a52] group-hover:text-white transition-colors duration-400" />
+        <Icon className="w-7 h-7 lg:w-8 lg:h-8 text-[#fe6a52] group-hover:text-white transition-colors duration-400" aria-hidden="true" />
       </motion.div>
 
       <div className={isRTL ? "text-right" : "text-left"}>
         <h3 className="text-lg lg:text-xl font-bold text-[#1f2b3b] mb-3 group-hover:text-[#fe6a52] transition-colors duration-300">
-          {service.title}
+          {title}
         </h3>
-        <p className="text-[#6b7280] text-sm lg:text-[15px] leading-relaxed">{service.description}</p>
+        <p className="text-[#6b7280] text-sm lg:text-[15px] leading-relaxed">{description}</p>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#fe6a52] to-[#f5c842] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rtl:origin-right" />
@@ -122,9 +72,8 @@ function ServiceCard({
   )
 }
 
-export default function Services({ siteTexts = {} }: ServicesProps) {
+export default function Services({ siteTexts = {}, services = [] }: ServicesProps) {
   const { t, language, isRTL } = useLanguage()
-  const services = servicesData[language]
 
   const servicesMain = siteTexts["services.main"]
   const sectionTitle = servicesMain
@@ -140,7 +89,7 @@ export default function Services({ siteTexts = {} }: ServicesProps) {
 
   const headerVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
   }
 
   return (
@@ -168,7 +117,7 @@ export default function Services({ siteTexts = {} }: ServicesProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {services.map((service, index) => (
-            <ServiceCard key={index} service={service} index={index} isRTL={isRTL} />
+            <ServiceCard key={service.id} service={service} index={index} isRTL={isRTL} language={language} />
           ))}
         </div>
       </div>

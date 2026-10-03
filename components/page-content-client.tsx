@@ -16,6 +16,7 @@ interface PageContentClientProps {
   consultants: any[]
   projects: any[]
   partners: any[]
+  services: any[]
   navItems: any[]
   siteTexts: Record<string, any>
   footerConfig: any
@@ -25,6 +26,7 @@ export default function PageContentClient({
   consultants,
   projects,
   partners,
+  services,
   navItems,
   siteTexts,
   footerConfig,
@@ -41,7 +43,7 @@ export default function PageContentClient({
       <Header navItems={navItems} />
       <Hero siteTexts={siteTexts} />
       <About siteTexts={siteTexts} />
-      <Services siteTexts={siteTexts} />
+      <Services siteTexts={siteTexts} services={services} />
       <Consultants consultants={consultants} siteTexts={siteTexts} />
       <Projects projects={projects} siteTexts={siteTexts} />
       <Partners partners={partners} siteTexts={siteTexts} />

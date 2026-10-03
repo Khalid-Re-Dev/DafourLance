@@ -1,13 +1,14 @@
 import { Suspense } from "react"
 import { LanguageProvider } from "@/lib/i18n/language-context"
-import { getConsultants, getProjects, getPartners, getNavItems, getAllSiteTexts, getFooterConfig } from "@/lib/cms"
+import { getConsultants, getProjects, getPartners, getServices, getNavItems, getAllSiteTexts, getFooterConfig } from "@/lib/cms"
 
 export default async function Home() {
   // Fetch all CMS data in parallel
-  const [consultants, projects, partners, navItems, siteTexts, footerConfig] = await Promise.all([
+  const [consultants, projects, partners, services, navItems, siteTexts, footerConfig] = await Promise.all([
     getConsultants(),
     getProjects(),
     getPartners(),
+    getServices(),
     getNavItems(),
     getAllSiteTexts(),
     getFooterConfig(),
@@ -20,6 +21,7 @@ export default async function Home() {
           consultants={consultants}
           projects={projects}
           partners={partners}
+          services={services}
           navItems={navItems}
           siteTexts={siteTexts}
           footerConfig={footerConfig}
@@ -33,6 +35,7 @@ function PageContent({
   consultants,
   projects,
   partners,
+  services,
   navItems,
   siteTexts,
   footerConfig,
@@ -40,6 +43,7 @@ function PageContent({
   consultants: Awaited<ReturnType<typeof getConsultants>>
   projects: Awaited<ReturnType<typeof getProjects>>
   partners: Awaited<ReturnType<typeof getPartners>>
+  services: Awaited<ReturnType<typeof getServices>>
   navItems: Awaited<ReturnType<typeof getNavItems>>
   siteTexts: Awaited<ReturnType<typeof getAllSiteTexts>>
   footerConfig: Awaited<ReturnType<typeof getFooterConfig>>
@@ -49,6 +53,7 @@ function PageContent({
       consultants={consultants}
       projects={projects}
       partners={partners}
+      services={services}
       navItems={navItems}
       siteTexts={siteTexts}
       footerConfig={footerConfig}

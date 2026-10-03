@@ -29,7 +29,7 @@ async function main() {
   console.log("🧭 Seeding navigation items...")
   const navItems = [
     { id: "nav-1", labelAr: "الرئيسية", labelEn: "Home", href: "#", order: 1, isVisible: true, isExternal: false },
-    { id: "nav-2", labelAr: "محمد بن سواد", labelEn: "About Us", href: "#about", order: 2, isVisible: true, isExternal: false },
+    { id: "nav-2", labelAr: "من نحن", labelEn: "About Us", href: "#about", order: 2, isVisible: true, isExternal: false },
     { id: "nav-3", labelAr: "خدماتنا", labelEn: "Services", href: "#services", order: 3, isVisible: true, isExternal: false },
     { id: "nav-4", labelAr: "الاستشاريين", labelEn: "Consultants", href: "#consultants", order: 4, isVisible: true, isExternal: false },
     { id: "nav-5", labelAr: "مشاريعنا", labelEn: "Projects", href: "#projects", order: 5, isVisible: true, isExternal: false },
@@ -53,7 +53,7 @@ async function main() {
     {
       id: "text-hero-title",
       key: "hero.title",
-      headingAr: "محمد بن سواد",
+      headingAr: "من نحن",
       headingEn: "Towards a Better Digital & Professional Experience",
       bodyAr: "نصمم تجارب مستخدم مبتكرة. نطور مواقع احترافية نقدم استشارات رقمية، وندربك لتطوير مهاراتك التقنية والإبداعية",
       bodyEn: "We design innovative user experiences. We develop professional websites, provide digital consulting, and train you to develop your technical and creative skills",
@@ -78,7 +78,7 @@ async function main() {
     {
       id: "text-about",
       key: "about.main",
-      headingAr: "محمد بن سواد",
+      headingAr: "من نحن",
       headingEn: "About Us",
       bodyAr: "دافور لانس فريق رقمي متخصص في تقديم حلول مبتكرة تمكن الشركات والمشاريع الناشئة من النمو والازدهار في العصر الرقمي.",
       bodyEn: "DaforLance is a digital team specialized in delivering innovative solutions that help companies and startups grow and thrive in the digital era.",
@@ -409,6 +409,87 @@ async function main() {
   console.log("   ✅ Contact info ready")
 
   // ─────────────────────────────────────────────────
+  // 9. Services
+  // ─────────────────────────────────────────────────
+  console.log("🛠️ Seeding services...")
+  const services = [
+    {
+      id: "svc-1",
+      icon: "Megaphone",
+      titleAr: "التسويق الرقمي",
+      titleEn: "Digital Marketing",
+      descriptionAr: "استراتيجيات تسويقية متكاملة لزيادة الوعي بعلامتك التجارية والوصول لجمهورك المستهدف",
+      descriptionEn: "Integrated marketing strategies to increase brand awareness and reach your target audience",
+      order: 1,
+      isActive: true,
+      isFeatured: false,
+    },
+    {
+      id: "svc-2",
+      icon: "Palette",
+      titleAr: "تصميم واجهات المستخدم",
+      titleEn: "UI Design",
+      descriptionAr: "نصمم واجهات جذابة وسهلة الاستخدام تعكس هوية علامتك التجارية وتحقق أهدافك",
+      descriptionEn: "We design attractive and easy-to-use interfaces that reflect your brand identity and achieve your goals",
+      order: 2,
+      isActive: true,
+      isFeatured: false,
+    },
+    {
+      id: "svc-3",
+      icon: "Code2",
+      titleAr: "تطوير المواقع",
+      titleEn: "Web Development",
+      descriptionAr: "نبني مواقع احترافية متجاوبة باستخدام أحدث التقنيات لضمان أداء مثالي وتجربة مستخدم سلسة",
+      descriptionEn: "We build professional responsive websites using the latest technologies to ensure optimal performance and seamless user experience",
+      order: 3,
+      isActive: true,
+      isFeatured: false,
+    },
+    {
+      id: "svc-4",
+      icon: "BarChart3",
+      titleAr: "تحليل البيانات",
+      titleEn: "Data Analytics",
+      descriptionAr: "نحلل بياناتك لاستخراج رؤى قيمة تساعدك في اتخاذ قرارات مدروسة وتحسين الأداء",
+      descriptionEn: "We analyze your data to extract valuable insights that help you make informed decisions and improve performance",
+      order: 4,
+      isActive: true,
+      isFeatured: false,
+    },
+    {
+      id: "svc-5",
+      icon: "Globe",
+      titleAr: "الاستشارات الرقمية",
+      titleEn: "Digital Consulting",
+      descriptionAr: "نقدم استشارات متخصصة لمساعدتك في التحول الرقمي واتخاذ القرارات التقنية الصحيحة",
+      descriptionEn: "We provide specialized consultations to help you with digital transformation and make the right technical decisions",
+      order: 5,
+      isActive: true,
+      isFeatured: false,
+    },
+    {
+      id: "svc-6",
+      icon: "GraduationCap",
+      titleAr: "التدريب والتأهيل",
+      titleEn: "Training & Qualification",
+      descriptionAr: "برامج تدريبية متخصصة لتطوير مهاراتك التقنية والإبداعية في مجال التقنية",
+      descriptionEn: "Specialized training programs to develop your technical and creative skills in the technology field",
+      order: 6,
+      isActive: true,
+      isFeatured: false,
+    },
+  ]
+  for (const svc of services) {
+    await prisma.service.upsert({
+      where: { id: svc.id },
+      update: svc,
+      create: svc,
+    })
+  }
+  console.log(`   ✅ ${services.length} services ready`)
+
+  // ─────────────────────────────────────────────────
   // Summary
   // ─────────────────────────────────────────────────
   console.log("\n" + "═".repeat(50))
@@ -420,6 +501,7 @@ async function main() {
   console.log(`   👥 Consultants:  ${await prisma.consultant.count()}`)
   console.log(`   📁 Projects:     ${await prisma.project.count()}`)
   console.log(`   🤝 Partners:     ${await prisma.partner.count()}`)
+  console.log(`   🛠️ Services:     ${await prisma.service.count()}`)
   console.log(`   📋 Footer:       ${await prisma.footerConfig.count()}`)
   console.log(`   📞 Contact:      ${await prisma.contactInfo.count()}`)
   console.log("═".repeat(50) + "\n")

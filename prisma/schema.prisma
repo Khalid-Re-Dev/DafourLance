@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -220,4 +220,19 @@ model AiKnowledgeSection {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// 🛠️ نموذج الخدمات
+model Service {
+  id            String   @id @default(cuid())
+  icon          String   @default("Sparkles")
+  titleAr       String
+  titleEn       String
+  descriptionAr String?
+  descriptionEn String?
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+  isFeatured    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

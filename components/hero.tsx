@@ -36,7 +36,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
     : t.hero.secondary
 
   return (
-    <section className="relative overflow-hidden bg-background py-16 lg:py-24">
+    <section id="hero" className="relative overflow-hidden bg-background py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         <div className={`flex flex-col ${isRTL ? "lg:flex-row" : "lg:flex-row-reverse"} items-center gap-12 lg:gap-20`}>
           {/* Image Side with Decorative Elements */}

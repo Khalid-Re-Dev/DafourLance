@@ -39,6 +39,16 @@ export async function getPartners() {
   } catch { return [] }
 }
 
+// جلب الخدمات
+export async function getServices() {
+  try {
+    return await prisma.service.findMany({
+      where: { isActive: true },
+      orderBy: { order: "asc" },
+    })
+  } catch { return [] }
+}
+
 // جلب عناصر القائمة
 export async function getNavItems() {
   try {

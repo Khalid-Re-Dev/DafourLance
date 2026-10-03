@@ -4,8 +4,23 @@ import type React from "react"
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Send, MessageCircle, Phone } from "lucide-react"
+import { X, Send, MessageCircle, Phone, Volume2, VolumeX } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
+import AnimatedMascot from "@/components/animated-mascot"
+import { useMascotMotion } from "@/hooks/use-mascot-motion"
+import { useMascotGuide } from "@/hooks/use-mascot-guide"
+import { WelcomePrompt } from "@/components/welcome-prompt"
+import { useReducedMotion } from "@/hooks/use-reduced-motion"
+import { MascotSpeechBubble } from "@/components/mascot-speech-bubble"
+import { speechService } from "@/services/speech-service"
+import {
+  IDLE_FLOAT_AMPLITUDE,
+  IDLE_FLOAT_DURATION,
+  IDLE_TILT_DEGREES,
+  ATTENTION_LIFT_PX,
+  ATTENTION_SCALE,
+  ATTENTION_DURATION_S,
+} from "@/config/mascot-motion"
 
 interface Message {
   id: string
@@ -71,11 +86,158 @@ function TypingIndicator() {
 export default function SmartAssistant() {
   const { language, isRTL } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
+  const prefersReducedMotion = useReducedMotion()
+  
+  // ── Mascot motion engine ──────────────────────────────────────────────────
+  const {
+    motionState,
+    targetPosition,
+    mascotSize,
+    isRelocating,
+    relocationDuration,
+    hasMounted,
+    handleInteractionStart,
+    handleInteractionEnd,
+  } = useMascotMotion({ isChatOpen: isOpen, isRTL })
+
+  const isUserInteracting = motionState === "interaction_pause"
+
+  // Mascot Guide Orchestration
+  const { 
+    showWelcome, 
+    welcomeMessage,
+    acceptGuide, 
+    dismissGuide, 
+    isMuted, 
+    toggleMute,
+    isGuidedMode,
+    isNarrationEligible,
+    pendingMessage,
+    activeSection,
+    speechStatus
+  } = useMascotGuide({ isChatOpen: isOpen, isUserInteracting })
+
   const [messages, setMessages] = useState<Message[]>([])
+  
+  // ── Narration Execution (Part 3B) ─────────────────────────────────────────
+  const [activeMessage, setActiveMessage] = useState<string | null>(null)
+  const [bubbleVisible, setBubbleVisible] = useState(false)
+  const consumedSectionRef = useRef<string | null>(null)
+  const bubbleLingerTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const failsafeTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const speechStartedRef = useRef(false)
+  const BUBBLE_LINGER_MS = 3000
+
+  // 1. Consume narration trigger
+  useEffect(() => {
+    if (isNarrationEligible && pendingMessage && activeSection) {
+      const sectionToken = `${activeSection}-${language}`
+      
+      if (consumedSectionRef.current !== sectionToken) {
+        consumedSectionRef.current = sectionToken
+        setActiveMessage(pendingMessage)
+        setBubbleVisible(true)
+        speechStartedRef.current = false
+
+        if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current)
+        if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current)
+
+        const canSpeak = !isMuted && speechService.isAvailable() && speechService.hasVoiceForLanguage(language);
+        if (canSpeak) {
+          const spoke = speechService.speak(pendingMessage, language);
+          if (spoke) {
+            failsafeTimerRef.current = setTimeout(() => {
+              if (!speechStartedRef.current) {
+                const duration = Math.max(3000, pendingMessage.length * 60);
+                bubbleLingerTimerRef.current = setTimeout(() => {
+                  setBubbleVisible(false);
+                }, duration);
+              }
+            }, 2000);
+          } else {
+            const duration = Math.max(3000, pendingMessage.length * 60);
+            bubbleLingerTimerRef.current = setTimeout(() => {
+              setBubbleVisible(false);
+            }, duration);
+          }
+        } else {
+          const duration = Math.max(3000, pendingMessage.length * 60);
+          bubbleLingerTimerRef.current = setTimeout(() => {
+            setBubbleVisible(false);
+          }, duration);
+        }
+      }
+    }
+  }, [isNarrationEligible, pendingMessage, activeSection, language, isMuted])
+
+  // 2. Handle speech status lifecycle
+  useEffect(() => {
+    if (!bubbleVisible) return;
+
+    if (speechStatus === 'speaking') {
+      speechStartedRef.current = true;
+      if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
+      if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
+    } else if (speechStatus === 'error') {
+      const duration = Math.max(3000, (activeMessage?.length || 0) * 60);
+      if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
+      bubbleLingerTimerRef.current = setTimeout(() => setBubbleVisible(false), duration);
+    } else if (speechStatus === 'idle') {
+      if (speechStartedRef.current) {
+        if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
+        bubbleLingerTimerRef.current = setTimeout(() => setBubbleVisible(false), BUBBLE_LINGER_MS);
+      }
+    }
+  }, [speechStatus, bubbleVisible, activeMessage])
+
+  // 3. Handle Mute toggle during speech
+  useEffect(() => {
+    if (isMuted && speechStatus === 'speaking') {
+      speechService.cancel();
+    }
+  }, [isMuted, speechStatus]);
+
+  // 4. Handle Interruption
+  useEffect(() => {
+    if (isOpen || !isGuidedMode) {
+      setBubbleVisible(false);
+      speechService.cancel();
+      if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
+      if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
+    }
+  }, [isOpen, isGuidedMode]);
+
+  // 5. Cleanup on unmount or language change
+  // Skip mount — no narration bubble is active yet and a mount-time
+  // cancel() would add fragility to the welcome TTS timing.
+  const isFirstLangRenderRef = useRef(true);
+  useEffect(() => {
+    if (isFirstLangRenderRef.current) {
+      isFirstLangRenderRef.current = false;
+      return;
+    }
+    setBubbleVisible(false)
+    setActiveMessage(null)
+    speechService.cancel();
+    consumedSectionRef.current = null 
+    if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
+    if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
+  }, [language])
+  // ──────────────────────────────────────────────────────────────────────────
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Determine idle float animation based on motion state
+  const shouldFloat =
+    !isOpen &&
+    motionState !== "chat_open" &&
+    motionState !== "reduced_motion" &&
+    motionState !== "scrolling" &&
+    motionState !== "contextual_reposition"
+
+  const isAttention = motionState === "attention"
 
   // Load chat history from localStorage
   useEffect(() => {
@@ -246,59 +408,150 @@ export default function SmartAssistant() {
 
   return (
     <>
-      {/* Floating Robot Icon Button */}
-      <motion.button
-        className={`fixed bottom-6 z-50 rounded-full bg-gradient-to-tr from-[#1f2b3b] to-[#3a4a5f] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.3)] ${
-          isRTL ? "left-6" : "right-6"
-        }`}
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-        whileHover={{ scale: 1.08, boxShadow: "0 14px 40px rgba(0,0,0,0.4)" }}
-        whileTap={{ scale: 0.95 }}
-        onClick={toggleChat}
-        aria-label={isOpen ? "Close assistant" : "Open smart assistant"}
+      {/* ── Motion-positioned mascot container ─────────────────────────────── */}
+      <div
+        className={`mascot-motion-container ${isRelocating ? "is-relocating" : ""}`}
+        style={{
+          transform: `translate(${targetPosition.x}px, ${targetPosition.y}px)`,
+          opacity: hasMounted ? 1 : 0,
+          transitionDuration: isRelocating ? `${relocationDuration}ms` : undefined,
+        }}
       >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div
-              key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <X className="w-7 h-7 text-white" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="robot"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <RobotIcon className="w-8 h-8" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Floating Robot Mascot Button */}
+        <motion.button
+          className="mascot-fab-button"
+          animate={
+            isAttention
+              ? {
+                  y: -ATTENTION_LIFT_PX,
+                  scale: ATTENTION_SCALE,
+                }
+              : shouldFloat
+                ? {
+                    y: [0, -IDLE_FLOAT_AMPLITUDE, 0],
+                    rotate: [0, IDLE_TILT_DEGREES, 0, -IDLE_TILT_DEGREES, 0],
+                  }
+                : {}
+          }
+          transition={
+            isAttention
+              ? { duration: ATTENTION_DURATION_S, ease: "easeOut" }
+              : shouldFloat && !prefersReducedMotion
+                ? {
+                    y: { duration: IDLE_FLOAT_DURATION, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
+                    rotate: { duration: IDLE_FLOAT_DURATION * 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
+                  }
+                : {}
+          }
+          whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
+          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+          onClick={toggleChat}
+          onMouseEnter={handleInteractionStart}
+          onMouseLeave={handleInteractionEnd}
+          onFocus={handleInteractionStart}
+          onBlur={handleInteractionEnd}
+          onTouchStart={handleInteractionStart}
+          onTouchEnd={handleInteractionEnd}
+          aria-label={isOpen ? (language === "ar" ? "إغلاق المساعد" : "Close assistant") : (language === "ar" ? "فتح المساعد الذكي" : "Open smart assistant")}
+        >
+          <AnimatePresence mode="wait">
+            {isOpen ? (
+              <motion.div
+                key="close"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#1f2b3b] to-[#3a4a5f] flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.3)]"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <X className="w-7 h-7 text-white" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="robot"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <AnimatedMascot
+                  size={mascotSize}
+                  variant="display"
+                  ariaLabel={language === "ar" ? "مساعد دافور لانس" : "DaforLance Assistant"}
+                  className="mascot-float-icon"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        {/* Pulse ring animation */}
-        {!isOpen && (
-          <motion.div
-            className="absolute inset-0 rounded-full border-2 border-[#fe6a52]"
-            animate={{ scale: [1, 1.4, 1.4], opacity: [0.6, 0, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
+          {/* Pulse ring animation */}
+          {!isOpen && motionState !== "reduced_motion" && (
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-[#fe6a52] pointer-events-none"
+              style={{ margin: "4px" }}
+              animate={{ scale: [1, 1.5, 1.5], opacity: [0.6, 0, 0] }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
+            />
+          )}
+        </motion.button>
+        
+        {/* Contextual Narration Bubble */}
+        {activeMessage && (
+          <MascotSpeechBubble
+            message={activeMessage}
+            visible={bubbleVisible && !isOpen}
+            isRTL={isRTL}
+            isSpeaking={speechStatus === 'speaking'}
+            isMuted={isMuted}
+            onMuteToggle={toggleMute}
+            onDismiss={() => {
+              setBubbleVisible(false)
+              speechService.cancel()
+            }}
+            targetPosition={targetPosition}
+            mascotSize={mascotSize}
           />
         )}
-      </motion.button>
+        
+        
+        {/* Welcome Prompt moved outside of transformed container */}
+        
+        {/* Mute Toggle (Only shown when Guide is active and chat is closed) */}
+        <AnimatePresence>
+          {isGuidedMode && !isOpen && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              onClick={toggleMute}
+              className={`absolute top-0 ${isRTL ? '-left-2' : '-right-2'} bg-white rounded-full p-1.5 shadow-md border border-gray-100 text-gray-500 hover:text-[#fe6a52] transition-colors z-10`}
+              aria-label={isMuted ? (language === 'ar' ? 'تفعيل الصوت' : 'Unmute') : (language === 'ar' ? 'كتم الصوت' : 'Mute')}
+            >
+              {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Welcome Prompt (Moved outside transformed container for true fixed positioning) */}
+      <WelcomePrompt
+        isVisible={showWelcome && !isOpen}
+        message={welcomeMessage}
+        language={language}
+        isRTL={isRTL}
+        prefersReducedMotion={prefersReducedMotion}
+        onAccept={acceptGuide}
+        onDecline={dismissGuide}
+      />
 
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`fixed bottom-24 z-50 w-[calc(100%-2rem)] sm:w-[400px] max-h-[70vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
+            className={`fixed z-50 w-[calc(100%-2rem)] sm:w-[400px] max-h-[70vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
               isRTL ? "left-4 sm:left-6" : "right-4 sm:right-6"
             }`}
+            style={{ bottom: `${mascotSize + 24}px` }}
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -307,8 +560,13 @@ export default function SmartAssistant() {
             {/* Header */}
             <div className="bg-gradient-to-r from-[#1f2b3b] to-[#2d3e50] px-4 py-4 flex items-center justify-between">
               <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-                  <RobotIcon className="w-7 h-7" />
+                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center overflow-hidden">
+                  <AnimatedMascot
+                    size={32}
+                    variant="display"
+                    animationEnabled={false}
+                    ariaLabel={language === "ar" ? "مساعد دافور لانس" : "DaforLance Assistant"}
+                  />
                 </div>
                 <div className={isRTL ? "text-right" : "text-left"}>
                   <h3 className="text-white font-semibold text-sm">{t.title}</h3>

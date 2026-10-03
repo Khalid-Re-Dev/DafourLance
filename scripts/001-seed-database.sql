@@ -4,7 +4,7 @@
 -- Seed navigation items
 INSERT INTO NavItem (id, labelAr, labelEn, href, "order", isVisible, isExternal, createdAt, updatedAt) VALUES
 ('nav-1', 'الرئيسية', 'Home', '#', 1, 1, 0, datetime('now'), datetime('now')),
-('nav-2', 'محمد بن سواد', 'About Us', '#about', 2, 1, 0, datetime('now'), datetime('now')),
+('nav-2', 'من نحن', 'About Us', '#about', 2, 1, 0, datetime('now'), datetime('now')),
 ('nav-3', 'خدماتنا', 'Services', '#services', 3, 1, 0, datetime('now'), datetime('now')),
 ('nav-4', 'الاستشاريين', 'Consultants', '#consultants', 4, 1, 0, datetime('now'), datetime('now')),
 ('nav-5', 'مشاريعنا', 'Projects', '#projects', 5, 1, 0, datetime('now'), datetime('now')),

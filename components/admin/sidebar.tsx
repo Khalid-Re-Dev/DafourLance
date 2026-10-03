@@ -8,6 +8,7 @@ import {
   Users,
   FolderKanban,
   Handshake,
+  Sparkles,
   Navigation,
   FileText,
   Settings,
@@ -24,6 +25,7 @@ const navItems = [
   { label: "Consultants", href: "/admin/consultants", icon: Users },
   { label: "Projects", href: "/admin/projects", icon: FolderKanban },
   { label: "Partners", href: "/admin/partners", icon: Handshake },
+  { label: "Services", href: "/admin/services", icon: Sparkles },
   { label: "Navigation", href: "/admin/navigation", icon: Navigation },
   { label: "Content", href: "/admin/content", icon: FileText },
   

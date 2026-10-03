@@ -8,7 +8,7 @@ const siteTextKeys = [
   { key: "hero.cta", headingAr: "ابدأ مشروعك الآن", headingEn: "Start Your Project Now", bodyAr: "اطلع على خدماتنا", bodyEn: "View Our Services" },
 
   // About
-  { key: "about.main", headingAr: "محمد بن سواد", headingEn: "About Us", bodyAr: "شركة رائدة في التحول الرقمي", bodyEn: "A leading company in digital transformation" },
+  { key: "about.main", headingAr: "من نحن", headingEn: "About Us", bodyAr: "شركة رائدة في التحول الرقمي", bodyEn: "A leading company in digital transformation" },
   { key: "about.vision", headingAr: "رؤيتنا", headingEn: "Our Vision", bodyAr: "", bodyEn: "" },
   { key: "about.mission", headingAr: "مهمتنا", headingEn: "Our Mission", bodyAr: "", bodyEn: "" },
   { key: "about.goals", headingAr: "أهدافنا", headingEn: "Our Goals", bodyAr: "", bodyEn: "" },
