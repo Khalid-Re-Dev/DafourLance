@@ -1,0 +1,141 @@
+{
+  "browser": "Chromium 134",
+  "deviceScaleFactor": 2,
+  "cases": [
+    {
+      "lang": "ar",
+      "width": 390,
+      "height": 844,
+      "reducedMotion": "reduce",
+      "metrics": {
+        "x": 54,
+        "y": 588,
+        "width": 320,
+        "height": 119.5,
+        "scroll": 0,
+        "horizontal": 0,
+        "outerOverflow": "visible",
+        "bodyOverflow": 0
+      },
+      "media": {
+        "tag": "IMG",
+        "width": 72,
+        "height": 72,
+        "fit": "contain",
+        "ready": null,
+        "natural": 456,
+        "containerOverflow": "visible"
+      },
+      "pageErrors": []
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "height": 900,
+      "reducedMotion": "reduce",
+      "metrics": {
+        "x": 1104,
+        "y": 622,
+        "width": 320,
+        "height": 142.25,
+        "scroll": 0,
+        "horizontal": 0,
+        "outerOverflow": "visible",
+        "bodyOverflow": 0
+      },
+      "media": {
+        "tag": "IMG",
+        "width": 88,
+        "height": 88,
+        "fit": "contain",
+        "ready": null,
+        "natural": 456,
+        "containerOverflow": "visible"
+      },
+      "pageErrors": []
+    },
+    {
+      "lang": "ar",
+      "width": 320,
+      "height": 568,
+      "reducedMotion": "reduce",
+      "metrics": {
+        "x": 16,
+        "y": 312,
+        "width": 288,
+        "height": 119.5,
+        "scroll": 0,
+        "horizontal": 0,
+        "outerOverflow": "visible",
+        "bodyOverflow": 0
+      },
+      "media": {
+        "tag": "IMG",
+        "width": 72,
+        "height": 72,
+        "fit": "contain",
+        "ready": null,
+        "natural": 456,
+        "containerOverflow": "visible"
+      },
+      "enlarged": {
+        "height": 417,
+        "scrollHeight": 417,
+        "overflow": "auto"
+      },
+      "pageErrors": []
+    },
+    {
+      "lang": "en",
+      "width": 568,
+      "height": 320,
+      "reducedMotion": "reduce",
+      "metrics": {
+        "x": 216,
+        "y": 42,
+        "width": 320,
+        "height": 142.25,
+        "scroll": 0,
+        "horizontal": 0,
+        "outerOverflow": "visible",
+        "bodyOverflow": 0
+      },
+      "media": {
+        "tag": "IMG",
+        "width": 72,
+        "height": 72,
+        "fit": "contain",
+        "ready": null,
+        "natural": 456,
+        "containerOverflow": "visible"
+      },
+      "pageErrors": []
+    },
+    {
+      "lang": "ar",
+      "width": 1280,
+      "height": 800,
+      "reducedMotion": "no-preference",
+      "metrics": {
+        "x": 16,
+        "y": 544,
+        "width": 320,
+        "height": 119.5,
+        "scroll": 0,
+        "horizontal": 0,
+        "outerOverflow": "visible",
+        "bodyOverflow": 0
+      },
+      "media": {
+        "tag": "VIDEO",
+        "width": 88.75389099121094,
+        "height": 88.75390625,
+        "fit": "contain",
+        "ready": 4,
+        "natural": 456,
+        "containerOverflow": "visible"
+      },
+      "pageErrors": []
+    }
+  ]
+}

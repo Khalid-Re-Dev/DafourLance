@@ -63,3 +63,29 @@ Generated speech is synthetic. Automated decoding, event checks and transcriptio
 - FFmpeg decoded all eight Arabic MP3s with finite, non-silent audio. Total size: 388,008 bytes. Per-file durations, signal measurements and approximate Arabic ASR transcripts are in `docs/qa/arabic-recordings-audio.json`.
 - Actual Chromium 134 playback was tested on `/ar` and `/en` at 390×844 with `speechSynthesis` disabled and a strict user-gesture autoplay policy. Welcome and hero recordings reached real `playing` and `ended` events; the test used the manual Play controls when blocked. Welcome did not replay on Start Tour, and there were no page JavaScript errors. Evidence: `docs/qa/arabic-recordings-browser.json`.
 - No live API/database integration or physical Windows/Firefox listening approval is inferred from these checks. ASR is approximate and contains recognition differences, particularly the brand name; it does not replace human pronunciation review.
+
+## Arabic quality review and replacement (October 2026)
+
+The user accepted playback but rejected the Nabra voice's naturalness and pronunciation. The bundled voice is therefore a functional baseline, **not an approved final brand voice**. This presentation fix does not claim to replace or improve those recordings.
+
+Recommended next audition: ElevenLabs with a native Arabic voice, comparing the available expressive models (v4/v3) using the same Welcome text. A warm, clear Modern Standard Arabic delivery with a light Saudi accent is a candidate direction, not a selected or exclusive voice. Model marketing is not a listening evaluation. A generic English voice reading Arabic can retain the wrong accent; select Arabic in the voice library. Azure Speech's `ar-SA-HamedNeural` / `ar-SA-ZariyahNeural` are alternatives worth auditioning if the preferred provider is unavailable.
+
+Generate once and serve the approved MP3s locally. The site needs no TTS subscription key, external request per visitor, or new browser SDK. Commercial ElevenLabs exports require the appropriate paid usage rights; a free audition does not grant commercial deployment rights. No account was accessed, credits spent or new provider voice generated during this change.
+
+1. Audition Welcome with two Arabic voices. Listen for the agreed pronunciation of **دافورلانس**, natural sentence endings, pacing and absence of metallic artifacts. Do not claim exclusivity for a shared library voice.
+2. After choosing the voice, export all eight messages using the exact Arabic spoken copy in `config/guide-messages.json`. `config/guide-spoken-ar.json` is a pronunciation aid; full diacritics are not necessarily ideal for every model. Review each recording, especially “الاستراتيجية” and “النتائج”.
+3. Save `welcome.mp3`, `hero.mp3`, `about.mp3`, `services.mp3`, `consultants.mp3`, `projects.mp3`, `partners.mp3`, `contact.mp3` together outside `public`. Keep volume consistent and avoid music/long silence.
+4. Validate without changing the app (Python 3 and FFmpeg):
+
+```sh
+python scripts/import-reviewed-arabic-audio.py --input-dir /path/to/reviewed-pack --provider ElevenLabs --voice "chosen voice and model" --license-note "rights covering these exports"
+```
+
+5. After listening approval, repeat with `--apply`. The importer validates the entire pack, checks decoding/duration/non-silence/duplicates, updates provenance and cache hashes, and preserves the MP3 playback architecture. Run `pnpm test` and review the resulting Git diff before publishing. It cannot automatically certify pronunciation or usage rights.
+
+Official references checked 2026-10-04:
+- https://elevenlabs.io/docs/overview/models
+- https://elevenlabs.io/docs/eleven-creative/playground/text-to-speech
+- https://elevenlabs.io/pricing
+- https://help.elevenlabs.io/hc/en-us/articles/13313564601361-Can-I-publish-the-content-I-generate-on-the-platform
+- https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support
