@@ -17,19 +17,24 @@ export function useMascotGuide({ isChatOpen, isUserInteracting, activeSection, i
   const [isMuted, setMuted] = useState(false)
   const [activeMessage, setActiveMessage] = useState<string | null>(null)
   const [speechStatus, setSpeechStatus] = useState<NarrationStatus>('idle')
+  const [speechError, setSpeechError] = useState<string | null>(null)
   const [cycleNumber, setCycleNumber] = useState(0)
   const bubbleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const retryConsumed = useRef(false)
+  const activeNarration = useRef<MessageId | null>(null)
   const previousLanguage = useRef(language)
   const stopBubble = useCallback(() => {
     clearTimeout(bubbleTimer.current)
     speechService.stop()
+    activeNarration.current = null
     setActiveMessage(null)
   }, [])
   useEffect(() => {
     setIsGuidedMode(cycle.enabled)
     try { setMuted(JSON.parse(localStorage.getItem(GUIDE_STORAGE_KEY) || '{}').mutedNarration === true) } catch {}
-    const unsubscribe = speechService.subscribeToStatusChanges(setSpeechStatus)
+    const unsubscribe = speechService.subscribeToStatusChanges(status => {
+      setSpeechStatus(status)
+      setSpeechError(speechService.currentError)
+    })
     return () => { unsubscribe(); clearTimeout(bubbleTimer.current); speechService.stop() }
   }, [])
   useEffect(() => {
@@ -70,6 +75,7 @@ export function useMascotGuide({ isChatOpen, isUserInteracting, activeSection, i
         cycle.narrated.add(token)
         const message = messages[activeSection as MessageId][language].text
         setActiveMessage(message)
+        activeNarration.current = activeSection
         clearTimeout(bubbleTimer.current)
         // Visual-only timeout also guards missing native audio callbacks.
         bubbleTimer.current = setTimeout(() => setActiveMessage(null), Math.max(8000, message.length * 85))
@@ -112,11 +118,19 @@ export function useMascotGuide({ isChatOpen, isUserInteracting, activeSection, i
     try { localStorage.setItem(GUIDE_STORAGE_KEY, JSON.stringify({ mutedNarration: next })) } catch {}
   }, [isMuted])
   const retryWelcome = useCallback(() => {
-    if (retryConsumed.current || !showWelcome || speechService.isPlaying) return
-    retryConsumed.current = true
+    if (isMuted || !showWelcome || isChatOpen || !isPageVisible || speechService.isPlaying || speechService.currentStatus === 'loading') return
     speechService.play('welcome', language)
-  }, [showWelcome, language])
+  }, [showWelcome, language, isMuted, isChatOpen, isPageVisible])
+  const retryNarration = useCallback(() => {
+    if (!activeNarration.current || !activeMessage || isMuted || isChatOpen || isScrolling || !isPageVisible || speechService.isPlaying || speechService.currentStatus === 'loading') return
+    clearTimeout(bubbleTimer.current)
+    bubbleTimer.current = setTimeout(() => setActiveMessage(null), Math.max(8000, activeMessage.length * 85))
+    speechService.play(activeNarration.current, language, { onEnd: () => {
+      clearTimeout(bubbleTimer.current)
+      bubbleTimer.current = setTimeout(() => setActiveMessage(null), 4000)
+    } })
+  }, [activeMessage, isMuted, isChatOpen, isScrolling, isPageVisible, language])
   return { showWelcome, welcomeMessage: messages.welcome[language].text, isGuidedMode, isMuted,
-    activeMessage, speechStatus, acceptGuide, dismissGuide, startGuideCycle, toggleMute,
-    dismissBubble: stopBubble, retryWelcome, canRetryWelcome: speechStatus === 'blocked' && !retryConsumed.current }
+    activeMessage, speechStatus, speechError, acceptGuide, dismissGuide, startGuideCycle, toggleMute,
+    dismissBubble: stopBubble, retryWelcome, retryNarration }
 }

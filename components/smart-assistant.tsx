@@ -94,7 +94,7 @@ export default function SmartAssistant() {
     isUserInteracting, relocate } = useMascotMotion({ isChatOpen: isOpen, isRTL, isScrolling, isPageVisible })
   const { showWelcome, welcomeMessage, acceptGuide, dismissGuide, isMuted, toggleMute,
     isGuidedMode, activeMessage, speechStatus, dismissBubble, retryWelcome,
-    canRetryWelcome, startGuideCycle } = useMascotGuide({ isChatOpen: isOpen,
+    speechError, retryNarration, startGuideCycle } = useMascotGuide({ isChatOpen: isOpen,
       isUserInteracting, activeSection, isScrolling, isPageVisible, relocate })
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState("")
@@ -377,6 +377,9 @@ export default function SmartAssistant() {
             isRTL={isRTL}
             isSpeaking={speechStatus === 'speaking'}
             isMuted={isMuted}
+            speechStatus={speechStatus}
+            speechError={speechError}
+            onPlay={retryNarration}
             onMuteToggle={toggleMute}
             onDismiss={dismissBubble}
             targetPosition={targetPosition}
@@ -413,7 +416,11 @@ export default function SmartAssistant() {
         prefersReducedMotion={prefersReducedMotion}
         onAccept={acceptGuide}
         onDecline={dismissGuide}
-        onPlay={canRetryWelcome ? retryWelcome : undefined}
+        onPlay={retryWelcome}
+        speechStatus={speechStatus}
+        speechError={speechError}
+        isMuted={isMuted}
+        onMuteToggle={toggleMute}
       />
 
       {/* Chat Window */}

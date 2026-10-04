@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, X } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
+import { NarrationFeedback, type NarrationFeedbackProps } from './narration-feedback';
 
 interface MascotSpeechBubbleProps {
   message: string;
@@ -11,6 +12,9 @@ interface MascotSpeechBubbleProps {
   isRTL: boolean;
   isSpeaking: boolean;
   isMuted: boolean;
+  speechStatus: NarrationFeedbackProps['status'];
+  speechError: string | null;
+  onPlay?: () => void;
   onMuteToggle?: () => void;
   onDismiss?: () => void;
   targetPosition?: { x: number, y: number };
@@ -23,6 +27,9 @@ export function MascotSpeechBubble({
   isRTL,
   isSpeaking,
   isMuted,
+  speechStatus,
+  speechError,
+  onPlay,
   onMuteToggle,
   onDismiss,
   targetPosition = { x: 0, y: 0 },
@@ -149,6 +156,7 @@ export function MascotSpeechBubble({
             <p className={`text-sm leading-relaxed font-cairo ${isRTL ? 'text-right' : 'text-left'}`}>
               {message}
             </p>
+            <NarrationFeedback language={isRTL ? 'ar' : 'en'} status={speechStatus} error={speechError} isMuted={isMuted} onPlay={onPlay} />
 
             {/* Pointer / Arrow */}
             <div 
