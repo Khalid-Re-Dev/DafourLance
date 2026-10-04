@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NarrationFeedback, type NarrationFeedbackProps } from './narration-feedback';
 
 export interface WelcomePromptProps {
   isVisible: boolean;
@@ -8,6 +9,10 @@ export interface WelcomePromptProps {
   isRTL: boolean;
   prefersReducedMotion: boolean;
   onPlay?: () => void;
+  speechStatus: NarrationFeedbackProps['status'];
+  speechError: string | null;
+  isMuted: boolean;
+  onMuteToggle: () => void;
   onAccept: () => void;
   onDecline: () => void;
 }
@@ -19,6 +24,10 @@ export function WelcomePrompt({
   isRTL,
   prefersReducedMotion,
   onPlay,
+  speechStatus,
+  speechError,
+  isMuted,
+  onMuteToggle,
   onAccept,
   onDecline,
 }: WelcomePromptProps) {
@@ -76,7 +85,10 @@ export function WelcomePrompt({
               </p>
             </div>
             
-            {onPlay && <button onClick={onPlay} className="text-sm text-[#c5432e] underline focus-visible:outline">{language === 'ar' ? 'تشغيل الترحيب الصوتي' : 'Play welcome audio'}</button>}
+            <div className="text-gray-700">
+              <NarrationFeedback language={language} status={speechStatus} error={speechError} isMuted={isMuted} onPlay={onPlay} />
+              {isMuted && <button type="button" onClick={onMuteToggle} className="min-h-8 text-xs underline">{language === 'ar' ? 'تفعيل الصوت' : 'Unmute'}</button>}
+            </div>
             <div className={`flex items-center gap-3 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <button
                 onClick={onAccept}
