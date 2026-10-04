@@ -1,0 +1,62 @@
+{
+  "browser": "Chromium 134 headless; Playwright 1.51.1",
+  "audio": "Real bundled MP3 decode/playback events; no synthetic Audio mock; no physical listening certification",
+  "results": [
+    {
+      "language": "ar",
+      "viewport": "390x844",
+      "speechSynthesisDisabled": true,
+      "realMediaEvents": [
+        {
+          "type": "playing",
+          "src": "http://127.0.0.1:3107/audio/guide/ar/welcome.mp3?v=d4c26a8bbf9e",
+          "duration": 4.992
+        },
+        {
+          "type": "ended",
+          "src": "http://127.0.0.1:3107/audio/guide/ar/welcome.mp3?v=d4c26a8bbf9e",
+          "duration": 4.992
+        },
+        {
+          "type": "playing",
+          "src": "http://127.0.0.1:3107/audio/guide/ar/hero.mp3?v=a7c017a648ce",
+          "duration": 6.744
+        },
+        {
+          "type": "ended",
+          "src": "http://127.0.0.1:3107/audio/guide/ar/hero.mp3?v=a7c017a648ce",
+          "duration": 6.744
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "language": "en",
+      "viewport": "390x844",
+      "speechSynthesisDisabled": true,
+      "realMediaEvents": [
+        {
+          "type": "playing",
+          "src": "http://127.0.0.1:3107/audio/guide/en/welcome.mp3?v=8664b1acddbf",
+          "duration": 3.970612
+        },
+        {
+          "type": "ended",
+          "src": "http://127.0.0.1:3107/audio/guide/en/welcome.mp3?v=8664b1acddbf",
+          "duration": 3.970612
+        },
+        {
+          "type": "playing",
+          "src": "http://127.0.0.1:3107/audio/guide/en/hero.mp3?v=8196d955755a",
+          "duration": 6.791837
+        },
+        {
+          "type": "ended",
+          "src": "http://127.0.0.1:3107/audio/guide/en/hero.mp3?v=8196d955755a",
+          "duration": 6.791837
+        }
+      ],
+      "pageErrors": []
+    }
+  ]
+}

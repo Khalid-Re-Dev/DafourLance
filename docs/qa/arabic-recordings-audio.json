@@ -1,0 +1,102 @@
+{
+  "decoder": "FFmpeg; mono float PCM",
+  "transcriber": "faster-whisper small, int8 CPU, forced ar; automated approximation, not human listening approval",
+  "files": {
+    "about": {
+      "bytes": 50733,
+      "durationSeconds": 6.312,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.1260707527399063,
+      "peak": 0.6777550578117371,
+      "approximateAsrTranscript": "أتعرف على دفور لانس فريقنا الشغوف وخبرتنا في تقديم أفضل الخدمات الاستشارية"
+    },
+    "consultants": {
+      "bytes": 48237,
+      "durationSeconds": 6.0,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.12207511067390442,
+      "peak": 0.5700465440750122,
+      "approximateAsrTranscript": "نخبط من المستشارين والخبراء جاهزون لتقديم أفضل الاستراتيجيات والحلول"
+    },
+    "contact": {
+      "bytes": 42669,
+      "durationSeconds": 5.304,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.12855714559555054,
+      "peak": 0.6050754189491272,
+      "approximateAsrTranscript": "تواصل معنا اليوم لبدء رحلة نجاحك الرقمي نحن هنا لمساعدتك"
+    },
+    "hero": {
+      "bytes": 54189,
+      "durationSeconds": 6.744,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.1272851973772049,
+      "peak": 0.6141271591186523,
+      "approximateAsrTranscript": "مرحبا بك في The Forlans نحن نقدم حلولا متكاملة لتحويل رؤيتك إلى واقع رقمي"
+    },
+    "partners": {
+      "bytes": 52653,
+      "durationSeconds": 6.552,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.12641873955726624,
+      "peak": 0.7203508019447327,
+      "approximateAsrTranscript": "نعتز بشركاتنا الاستراتيجية مع نخبة من المؤسسات لتقديم أفضل النطائش"
+    },
+    "projects": {
+      "bytes": 44973,
+      "durationSeconds": 5.592,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.12609368562698364,
+      "peak": 0.6522989273071289,
+      "approximateAsrTranscript": "تصفح سابقة أعمالنا وتعرف على قصص نجاح مشاريعنا المتميزة"
+    },
+    "services": {
+      "bytes": 54381,
+      "durationSeconds": 6.768,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.12485898286104202,
+      "peak": 0.6079074144363403,
+      "approximateAsrTranscript": "نقدم مجموعة متنوعة من الخدمات من الاستشارات إلى التطوير لضمان نجاح مشروع كاف"
+    },
+    "welcome": {
+      "bytes": 40173,
+      "durationSeconds": 4.992,
+      "stream": {
+        "codec_name": "mp3",
+        "sample_rate": "24000",
+        "channels": 1
+      },
+      "rms": 0.1264420449733734,
+      "peak": 0.6456509828567505,
+      "approximateAsrTranscript": "مرحبا بك في دفور لانس هل ترغب أن أعرفك سريعا على الموقع؟"
+    }
+  }
+}

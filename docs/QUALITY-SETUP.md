@@ -6,7 +6,7 @@ This branch preserves the existing UI layout, CMS schema, authentication and cha
 2. Set the existing database and AI configuration in your local, ignored environment file as appropriate. Never commit real keys.
 3. Set **`SITE_URL` to the real public origin before `pnpm build`** (for example your actual HTTPS domain, no locale suffix). This enables canonical/hreflang, sitemap entries and indexing. Without it the landing page deliberately sends `noindex` and omits canonical/hreflang; the sitemap is empty. Do not deploy without configuring the correct origin. No production domain was supplied for this audit.
 4. Run `pnpm exec prisma generate`, `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm test`, `pnpm build`, then `pnpm start`.
-5. Review [NARRATION.md](NARRATION.md) before enabling Arabic static audio.
+5. Arabic and English recordings are included. Review [NARRATION.md](NARRATION.md), then test Play audio and mute on both languages.
 
 Fonts are the same Cairo Arabic/Latin variable font bytes as the baseline, served locally. Their SIL OFL license is in `public/fonts/OFL.txt`. Original image/video assets have been retained. The new WebP poster is a display-size derivative.
 
