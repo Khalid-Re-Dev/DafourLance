@@ -1,0 +1,13 @@
+{
+  "ar": {},
+  "en": {
+    "welcome": "/audio/guide/en/welcome.mp3?v=8664b1acddbf",
+    "hero": "/audio/guide/en/hero.mp3?v=8196d955755a",
+    "about": "/audio/guide/en/about.mp3?v=08bfdddb0842",
+    "services": "/audio/guide/en/services.mp3?v=6c069a14ddb3",
+    "consultants": "/audio/guide/en/consultants.mp3?v=9d116718945b",
+    "projects": "/audio/guide/en/projects.mp3?v=2b9a22336a64",
+    "partners": "/audio/guide/en/partners.mp3?v=92457cb2437b",
+    "contact": "/audio/guide/en/contact.mp3?v=7be188e7750c"
+  }
+}

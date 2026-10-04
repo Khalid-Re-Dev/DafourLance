@@ -18,7 +18,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 
 // ── Asset paths (served from /public/mascot/) ─────────────────────────────────
 const MASCOT_WEBM = "/mascot/robot-mascot.webm"
-const MASCOT_POSTER = "/mascot/robot-mascot-poster.png"
+const MASCOT_POSTER = "/mascot/robot-mascot-poster.webp"
 
 // ── Inline SVG fallback (matches the original RobotIcon) ──────────────────────
 function FallbackRobotSVG({ size }: { size: number }) {
@@ -83,8 +83,15 @@ export default function AnimatedMascot({
 }: AnimatedMascotProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [assetState, setAssetState] = useState<"video" | "poster" | "svg">("video")
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(true)
   const [isVideoReady, setIsVideoReady] = useState(false)
+  const [videoEligible, setVideoEligible] = useState(false)
+  useEffect(() => {
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+    if (!animationEnabled || prefersReducedMotion || connection?.saveData) return
+    const timer = setTimeout(() => setVideoEligible(true), Math.max(0, 7000 - performance.now()))
+    return () => clearTimeout(timer)
+  }, [animationEnabled, prefersReducedMotion])
 
   // ── Detect reduced-motion preference ──────────────────────────────────────
   useEffect(() => {
@@ -96,7 +103,7 @@ export default function AnimatedMascot({
   }, [])
 
   // ── Determine if we should show the video or a static fallback ────────────
-  const showVideo = assetState === "video" && animationEnabled && !prefersReducedMotion
+  const showVideo = videoEligible && assetState === "video" && animationEnabled && !prefersReducedMotion
 
   // ── Control video playback based on animation state ───────────────────────
   useEffect(() => {
@@ -156,7 +163,6 @@ export default function AnimatedMascot({
 
     if (assetState === "poster" || !showVideo) {
       return (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={MASCOT_POSTER}
           alt=""
@@ -177,6 +183,7 @@ export default function AnimatedMascot({
     return (
       <video
         ref={videoRef}
+        preload="none"
         autoPlay
         loop
         muted

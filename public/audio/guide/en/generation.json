@@ -1,0 +1,48 @@
+{
+  "language": "en",
+  "model": "en_US-ljspeech-medium.onnx",
+  "modelSha256": "6f52a751e2349abe7a76735eb09dc1875298c77ea2342ffd2fef79ff81b87f22",
+  "licenseNote": "LJ Speech dataset: public domain; https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_US/ljspeech/medium/MODEL_CARD",
+  "files": {
+    "welcome": {
+      "bytes": 24050,
+      "sha256": "8664b1acddbfd16f0991289d45d359b30f685e74718b2f46d865bd41e8a5c800",
+      "spokenText": "Welcome to Da four lance. Would you like me to give you a quick tour?"
+    },
+    "hero": {
+      "bytes": 40978,
+      "sha256": "8196d955755a745d63bcd52fab538a7b88dfefd89cd302c438dfaa7d6f33b0f2",
+      "spokenText": "Welcome to Da four lance. We provide comprehensive solutions to turn your vision into digital reality."
+    },
+    "about": {
+      "bytes": 40194,
+      "sha256": "08bfdddb084228b393ed0ca31a8eb26ceb5ed5b86b7b192393b620e806eae203",
+      "spokenText": "Discover Da four lance, our passionate team, and our expertise in providing the best consulting services."
+    },
+    "services": {
+      "bytes": 40508,
+      "sha256": "6c069a14ddb3987d835e94563e6b19e263a533f3c281ebb872def5d69d10d7d3",
+      "spokenText": "We offer a variety of services from consulting to development to ensure your project's success."
+    },
+    "consultants": {
+      "bytes": 35962,
+      "sha256": "9d116718945b0d02f418283ae0ec50b33257f44f50c22e9e52251ae85679ca73",
+      "spokenText": "An elite group of consultants and experts ready to provide the best strategies and solutions."
+    },
+    "projects": {
+      "bytes": 34238,
+      "sha256": "2b9a22336a6481ab1099224a6bc908f725b84eaf14e054be8cb68595ceea5cd1",
+      "spokenText": "Browse our portfolio and discover the success stories of our outstanding projects."
+    },
+    "partners": {
+      "bytes": 39254,
+      "sha256": "92457cb2437bc41f48f3e7a56c00029d46bac1f3510205cc79e7ade54a596df5",
+      "spokenText": "We pride ourselves on our strategic partnerships with leading organizations to deliver the best results."
+    },
+    "contact": {
+      "bytes": 30006,
+      "sha256": "7be188e7750cc413c6e66ed0014603dc3387aaac439d9c0ee612269e5eff5be6",
+      "spokenText": "Contact us today to start your digital success journey. We are here to help."
+    }
+  }
+}

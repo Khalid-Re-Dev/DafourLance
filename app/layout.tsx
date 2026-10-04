@@ -1,69 +1,28 @@
-import type React from "react"
-import type { Metadata, Viewport } from "next"
-import { Cairo } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
-import SmartAssistant from "@/components/smart-assistant"
-import { Toaster } from "@/components/ui/sonner"
-import { LanguageProvider } from "@/lib/i18n/language-context"
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-cairo",
+import type { ReactNode } from 'react'
+import type { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
+import { headers } from 'next/headers'
+import { Analytics } from '@vercel/analytics/next'
+import './globals.css'
+import DeferredAssistant from '@/components/deferred-assistant'
+import MotionProvider from '@/components/motion-provider'
+import { Toaster } from '@/components/ui/sonner'
+import { LanguageProvider } from '@/lib/i18n/language-context'
+const cairo = localFont({
+  src: [ { path: '../public/fonts/cairo-arabic.woff2', weight: '200 1000', style: 'normal' },
+    { path: '../public/fonts/cairo-latin.woff2', weight: '200 1000', style: 'normal' } ],
+  display: 'swap', variable: '--font-cairo', fallback: ['Arial'],
 })
-
-export const metadata: Metadata = {
-  title: "Dafourlance - نحو تجربة رقمية واحترافية أفضل",
-  description:
-    "نصمم تجارب مستخدم مبتكرة. نطور مواقع احترافية نقدم استشارات رقمية وندربك لتطوير مهاراتك التقنية والإبداعية",
-  keywords: ["digital services", "consulting", "web development", "UI/UX design", "خدمات رقمية", "استشارات", "تصميم"],
-  authors: [{ name: "Dafourlance" }],
-  creator: "Dafourlance",
-  openGraph: {
-    type: "website",
-    locale: "ar_SA",
-    alternateLocale: "en_US",
-    title: "Dafourlance - Digital Services & Consulting Platform",
-    description:
-      "We design innovative user experiences. We develop professional websites and provide digital consulting.",
-    siteName: "Dafourlance",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Dafourlance - Digital Services & Consulting Platform",
-    description:
-      "We design innovative user experiences. We develop professional websites and provide digital consulting.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  generator: 'v0.app'
-}
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  themeColor: "#fe6a52",
-}
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
-  return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={`${cairo.variable} font-sans antialiased`}>
-        <LanguageProvider>
-          {children}
-          <Analytics />
-          <SmartAssistant />
-          <Toaster position="top-right" richColors />
-        </LanguageProvider>
-      </body>
-    </html>
-  )
+export const metadata: Metadata = { title: 'Dafourlance', description: 'Digital services and consulting' }
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#fe6a52' }
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const language = (await headers()).get('x-site-language') === 'en' ? 'en' : 'ar'
+  return <html lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <body className={`${cairo.variable} font-sans antialiased`}>
+      <LanguageProvider initialLanguage={language}><MotionProvider>
+        {children}<DeferredAssistant /><Toaster position="top-right" richColors />
+      </MotionProvider></LanguageProvider>
+      <Analytics />
+    </body>
+  </html>
 }

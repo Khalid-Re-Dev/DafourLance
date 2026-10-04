@@ -102,7 +102,7 @@ export default function Projects({ projects, siteTexts }: ProjectsProps) {
             >
               {/* صورة المشروع */}
               <div className="relative h-72 overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={project.imageUrl || "/placeholder.svg"}
                   alt={language === "ar" ? project.titleAr : project.titleEn}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

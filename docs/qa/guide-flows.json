@@ -1,0 +1,19 @@
+{
+  "passed": [
+    "welcome once",
+    "start without replay",
+    "hero after dwell",
+    "chat cancels bubble",
+    "chat close no replay",
+    "restart resets cycle",
+    "language synchronized",
+    "refresh new welcome"
+  ],
+  "errors": [],
+  "requests": [
+    "http://localhost:3000/audio/guide/en/welcome.mp3?v=8664b1acddbf",
+    "http://localhost:3000/audio/guide/en/hero.mp3?v=8196d955755a",
+    "http://localhost:3000/audio/guide/en/hero.mp3?v=8196d955755a"
+  ],
+  "plays": []
+}

@@ -8,11 +8,11 @@ import { X, Send, MessageCircle, Phone, Volume2, VolumeX } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import AnimatedMascot from "@/components/animated-mascot"
 import { useMascotMotion } from "@/hooks/use-mascot-motion"
+import { useActiveSection } from "@/hooks/use-active-section"
 import { useMascotGuide } from "@/hooks/use-mascot-guide"
 import { WelcomePrompt } from "@/components/welcome-prompt"
 import { useReducedMotion } from "@/hooks/use-reduced-motion"
 import { MascotSpeechBubble } from "@/components/mascot-speech-bubble"
-import { speechService } from "@/services/speech-service"
 import {
   IDLE_FLOAT_AMPLITUDE,
   IDLE_FLOAT_DURATION,
@@ -88,142 +88,15 @@ export default function SmartAssistant() {
   const [isOpen, setIsOpen] = useState(false)
   const prefersReducedMotion = useReducedMotion()
   
-  // ── Mascot motion engine ──────────────────────────────────────────────────
-  const {
-    motionState,
-    targetPosition,
-    mascotSize,
-    isRelocating,
-    relocationDuration,
-    hasMounted,
-    handleInteractionStart,
-    handleInteractionEnd,
-  } = useMascotMotion({ isChatOpen: isOpen, isRTL })
-
-  const isUserInteracting = motionState === "interaction_pause"
-
-  // Mascot Guide Orchestration
-  const { 
-    showWelcome, 
-    welcomeMessage,
-    acceptGuide, 
-    dismissGuide, 
-    isMuted, 
-    toggleMute,
-    isGuidedMode,
-    isNarrationEligible,
-    pendingMessage,
-    activeSection,
-    speechStatus
-  } = useMascotGuide({ isChatOpen: isOpen, isUserInteracting })
-
+  const { activeSection, isScrolling, isPageVisible } = useActiveSection()
+  const { containerRef, motionState, targetPosition, mascotSize, isRelocating,
+    relocationDuration, hasMounted, handleInteractionStart, handleInteractionEnd,
+    isUserInteracting, relocate } = useMascotMotion({ isChatOpen: isOpen, isRTL, isScrolling, isPageVisible })
+  const { showWelcome, welcomeMessage, acceptGuide, dismissGuide, isMuted, toggleMute,
+    isGuidedMode, activeMessage, speechStatus, dismissBubble, retryWelcome,
+    canRetryWelcome, startGuideCycle } = useMascotGuide({ isChatOpen: isOpen,
+      isUserInteracting, activeSection, isScrolling, isPageVisible, relocate })
   const [messages, setMessages] = useState<Message[]>([])
-  
-  // ── Narration Execution (Part 3B) ─────────────────────────────────────────
-  const [activeMessage, setActiveMessage] = useState<string | null>(null)
-  const [bubbleVisible, setBubbleVisible] = useState(false)
-  const consumedSectionRef = useRef<string | null>(null)
-  const bubbleLingerTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const failsafeTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const speechStartedRef = useRef(false)
-  const BUBBLE_LINGER_MS = 3000
-
-  // 1. Consume narration trigger
-  useEffect(() => {
-    if (isNarrationEligible && pendingMessage && activeSection) {
-      const sectionToken = `${activeSection}-${language}`
-      
-      if (consumedSectionRef.current !== sectionToken) {
-        consumedSectionRef.current = sectionToken
-        setActiveMessage(pendingMessage)
-        setBubbleVisible(true)
-        speechStartedRef.current = false
-
-        if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current)
-        if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current)
-
-        const canSpeak = !isMuted && speechService.isAvailable() && speechService.hasVoiceForLanguage(language);
-        if (canSpeak) {
-          const spoke = speechService.speak(pendingMessage, language);
-          if (spoke) {
-            failsafeTimerRef.current = setTimeout(() => {
-              if (!speechStartedRef.current) {
-                const duration = Math.max(3000, pendingMessage.length * 60);
-                bubbleLingerTimerRef.current = setTimeout(() => {
-                  setBubbleVisible(false);
-                }, duration);
-              }
-            }, 2000);
-          } else {
-            const duration = Math.max(3000, pendingMessage.length * 60);
-            bubbleLingerTimerRef.current = setTimeout(() => {
-              setBubbleVisible(false);
-            }, duration);
-          }
-        } else {
-          const duration = Math.max(3000, pendingMessage.length * 60);
-          bubbleLingerTimerRef.current = setTimeout(() => {
-            setBubbleVisible(false);
-          }, duration);
-        }
-      }
-    }
-  }, [isNarrationEligible, pendingMessage, activeSection, language, isMuted])
-
-  // 2. Handle speech status lifecycle
-  useEffect(() => {
-    if (!bubbleVisible) return;
-
-    if (speechStatus === 'speaking') {
-      speechStartedRef.current = true;
-      if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
-      if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
-    } else if (speechStatus === 'error') {
-      const duration = Math.max(3000, (activeMessage?.length || 0) * 60);
-      if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
-      bubbleLingerTimerRef.current = setTimeout(() => setBubbleVisible(false), duration);
-    } else if (speechStatus === 'idle') {
-      if (speechStartedRef.current) {
-        if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
-        bubbleLingerTimerRef.current = setTimeout(() => setBubbleVisible(false), BUBBLE_LINGER_MS);
-      }
-    }
-  }, [speechStatus, bubbleVisible, activeMessage])
-
-  // 3. Handle Mute toggle during speech
-  useEffect(() => {
-    if (isMuted && speechStatus === 'speaking') {
-      speechService.cancel();
-    }
-  }, [isMuted, speechStatus]);
-
-  // 4. Handle Interruption
-  useEffect(() => {
-    if (isOpen || !isGuidedMode) {
-      setBubbleVisible(false);
-      speechService.cancel();
-      if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
-      if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
-    }
-  }, [isOpen, isGuidedMode]);
-
-  // 5. Cleanup on unmount or language change
-  // Skip mount — no narration bubble is active yet and a mount-time
-  // cancel() would add fragility to the welcome TTS timing.
-  const isFirstLangRenderRef = useRef(true);
-  useEffect(() => {
-    if (isFirstLangRenderRef.current) {
-      isFirstLangRenderRef.current = false;
-      return;
-    }
-    setBubbleVisible(false)
-    setActiveMessage(null)
-    speechService.cancel();
-    consumedSectionRef.current = null 
-    if (bubbleLingerTimerRef.current) clearTimeout(bubbleLingerTimerRef.current);
-    if (failsafeTimerRef.current) clearTimeout(failsafeTimerRef.current);
-  }, [language])
-  // ──────────────────────────────────────────────────────────────────────────
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -231,13 +104,13 @@ export default function SmartAssistant() {
 
   // Determine idle float animation based on motion state
   const shouldFloat =
-    !isOpen &&
+    !isOpen && isPageVisible && !prefersReducedMotion && !isUserInteracting &&
     motionState !== "chat_open" &&
     motionState !== "reduced_motion" &&
     motionState !== "scrolling" &&
     motionState !== "contextual_reposition"
 
-  const isAttention = motionState === "attention"
+  const isAttention = showWelcome && !prefersReducedMotion && !isScrolling
 
   // Load chat history from localStorage
   useEffect(() => {
@@ -276,7 +149,8 @@ export default function SmartAssistant() {
   // Focus input when chat opens
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300)
+      const timer = setTimeout(() => inputRef.current?.focus(), 300)
+      return () => clearTimeout(timer)
     }
   }, [isOpen])
 
@@ -366,7 +240,7 @@ export default function SmartAssistant() {
 
   const clearHistory = () => {
     setMessages([])
-    localStorage.removeItem(STORAGE_KEY)
+    try { localStorage.removeItem(STORAGE_KEY) } catch {}
   }
 
   const texts = {
@@ -410,16 +284,33 @@ export default function SmartAssistant() {
     <>
       {/* ── Motion-positioned mascot container ─────────────────────────────── */}
       <div
+        ref={containerRef}
         className={`mascot-motion-container ${isRelocating ? "is-relocating" : ""}`}
         style={{
           transform: `translate(${targetPosition.x}px, ${targetPosition.y}px)`,
           opacity: hasMounted ? 1 : 0,
-          transitionDuration: isRelocating ? `${relocationDuration}ms` : undefined,
+          transitionDuration: isRelocating ? `${relocationDuration}ms` : "0ms",
+          width: mascotSize, height: mascotSize,
         }}
       >
         {/* Floating Robot Mascot Button */}
         <motion.button
           className="mascot-fab-button"
+          whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
+          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+          onClick={toggleChat}
+          onMouseEnter={handleInteractionStart}
+          onMouseLeave={handleInteractionEnd}
+          onFocus={handleInteractionStart}
+          onBlur={handleInteractionEnd}
+          onTouchStart={handleInteractionStart}
+          onTouchEnd={handleInteractionEnd}
+          onTouchCancel={handleInteractionEnd}
+          aria-expanded={isOpen}
+          aria-controls="assistant-chat"
+          aria-label={isOpen ? (language === "ar" ? "إغلاق المساعد" : "Close assistant") : (language === "ar" ? "فتح المساعد الذكي" : "Open smart assistant")}
+        >
+          <motion.div
           animate={
             isAttention
               ? {
@@ -431,7 +322,7 @@ export default function SmartAssistant() {
                     y: [0, -IDLE_FLOAT_AMPLITUDE, 0],
                     rotate: [0, IDLE_TILT_DEGREES, 0, -IDLE_TILT_DEGREES, 0],
                   }
-                : {}
+                : { y: 0, rotate: 0, scale: 1 }
           }
           transition={
             isAttention
@@ -443,17 +334,7 @@ export default function SmartAssistant() {
                   }
                 : {}
           }
-          whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
-          whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-          onClick={toggleChat}
-          onMouseEnter={handleInteractionStart}
-          onMouseLeave={handleInteractionEnd}
-          onFocus={handleInteractionStart}
-          onBlur={handleInteractionEnd}
-          onTouchStart={handleInteractionStart}
-          onTouchEnd={handleInteractionEnd}
-          aria-label={isOpen ? (language === "ar" ? "إغلاق المساعد" : "Close assistant") : (language === "ar" ? "فتح المساعد الذكي" : "Open smart assistant")}
-        >
+          >
           <AnimatePresence mode="wait">
             {isOpen ? (
               <motion.div
@@ -475,6 +356,7 @@ export default function SmartAssistant() {
                 transition={{ duration: 0.2 }}
               >
                 <AnimatedMascot
+                  animationEnabled={isPageVisible && !prefersReducedMotion}
                   size={mascotSize}
                   variant="display"
                   ariaLabel={language === "ar" ? "مساعد دافور لانس" : "DaforLance Assistant"}
@@ -483,31 +365,20 @@ export default function SmartAssistant() {
               </motion.div>
             )}
           </AnimatePresence>
+          </motion.div>
 
-          {/* Pulse ring animation */}
-          {!isOpen && motionState !== "reduced_motion" && (
-            <motion.div
-              className="absolute inset-0 rounded-full border-2 border-[#fe6a52] pointer-events-none"
-              style={{ margin: "4px" }}
-              animate={{ scale: [1, 1.5, 1.5], opacity: [0.6, 0, 0] }}
-              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeOut" }}
-            />
-          )}
         </motion.button>
         
         {/* Contextual Narration Bubble */}
         {activeMessage && (
           <MascotSpeechBubble
             message={activeMessage}
-            visible={bubbleVisible && !isOpen}
+            visible={!!activeMessage && !isOpen && !isRelocating}
             isRTL={isRTL}
             isSpeaking={speechStatus === 'speaking'}
             isMuted={isMuted}
             onMuteToggle={toggleMute}
-            onDismiss={() => {
-              setBubbleVisible(false)
-              speechService.cancel()
-            }}
+            onDismiss={dismissBubble}
             targetPosition={targetPosition}
             mascotSize={mascotSize}
           />
@@ -542,16 +413,19 @@ export default function SmartAssistant() {
         prefersReducedMotion={prefersReducedMotion}
         onAccept={acceptGuide}
         onDecline={dismissGuide}
+        onPlay={canRetryWelcome ? retryWelcome : undefined}
       />
 
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id="assistant-chat" role="dialog" aria-label={t.title} dir={isRTL ? "rtl" : "ltr"}
+            onKeyDown={event => { if (event.key === "Escape") { setIsOpen(false); containerRef.current?.querySelector("button")?.focus() } }}
             className={`fixed z-50 w-[calc(100%-2rem)] sm:w-[400px] max-h-[70vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
               isRTL ? "left-4 sm:left-6" : "right-4 sm:right-6"
             }`}
-            style={{ bottom: `${mascotSize + 24}px` }}
+            style={{ bottom: `max(env(safe-area-inset-bottom), ${mascotSize + 48}px)`, width: "min(400px, calc(100vw - 32px))", maxHeight: `calc(100dvh - ${mascotSize + 80}px)` }}
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -573,13 +447,14 @@ export default function SmartAssistant() {
                   <span className="text-white/60 text-xs">{language === "ar" ? "متصل الآن" : "Online"}</span>
                 </div>
               </div>
+              <button onClick={() => { setIsOpen(false); startGuideCycle() }} className="text-white text-xs focus-visible:outline">{language === 'ar' ? 'إعادة الجولة' : 'Restart tour'}</button>
               <button onClick={clearHistory} className="text-white/60 hover:text-white text-xs transition-colors">
                 {t.clearHistory}
               </button>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px] max-h-[400px] bg-[#f9fafb]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 max-h-[400px] bg-[#f9fafb]">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
@@ -647,6 +522,7 @@ export default function SmartAssistant() {
                 <input
                   ref={inputRef}
                   type="text"
+                  aria-label={t.placeholder}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -657,6 +533,7 @@ export default function SmartAssistant() {
                   disabled={isLoading}
                 />
                 <motion.button
+                  aria-label={t.send}
                   onClick={sendMessage}
                   disabled={!inputValue.trim() || isLoading}
                   className="w-11 h-11 bg-[#fe6a52] rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed"

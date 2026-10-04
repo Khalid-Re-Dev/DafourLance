@@ -1,297 +1,122 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { GuideState, GuidePreferences, SpeechStatus } from '@/types/mascot-guide';
-import { guidePreferencesService } from '@/services/guide-preferences';
-import { WELCOME_DELAY_MS, WELCOME_AUTO_DISMISS_MS, DWELL_NARRATION_THRESHOLD_MS, GUIDE_SECTIONS, WELCOME_TEXTS } from '@/config/mascot-guide';
-import { useLanguage } from '@/lib/i18n/language-context';
-import { useActiveSection } from '@/hooks/use-active-section';
-import { useReducedMotion } from '@/hooks/use-reduced-motion';
-import { speechService } from '@/services/speech-service';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLanguage } from '@/lib/i18n/language-context'
+import { speechService, type NarrationStatus } from '@/services/speech-service'
+import { messages, type MessageId, WELCOME_DELAY_MS, DWELL_NARRATION_THRESHOLD_MS, GUIDE_STORAGE_KEY } from '@/config/mascot-guide'
+import type { SectionId } from '@/types/mascot'
 
-export interface UseMascotGuideParams {
-  isChatOpen: boolean;
-  isUserInteracting?: boolean;
-}
+// Document lifecycle, not localStorage: survives route remounts, resets on hard refresh.
+const cycle = { welcomeClaimed: false, enabled: false, narrated: new Set<string>() }
 
-export function useMascotGuide({ isChatOpen, isUserInteracting = false }: UseMascotGuideParams) {
-  const { language } = useLanguage();
-  const { activeSection } = useActiveSection();
-  const prefersReducedMotion = useReducedMotion();
-
-  // Internal state
-  const [guideState, setGuideState] = useState<GuideState>({ status: 'idle' });
-  const [preferences, setPreferences] = useState<GuidePreferences>(() => 
-    guidePreferencesService.getPreferences()
-  );
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [isGuidedMode, setIsGuidedMode] = useState(false);
-  const [speechStatus, setSpeechStatus] = useState<SpeechStatus>('idle');
-  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
-
-  // Refs for timers to ensure safe cleanup
-  const welcomeDelayTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const welcomeDismissTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const dwellTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Welcome Speech Ref for one-shot execution
-  const welcomeSpeechConsumedRef = useRef<string | null>(null);
-  const welcomeSpeechSuccessRef = useRef(false);
-  const welcomeMessage = language === 'ar' ? WELCOME_TEXTS.ar.message : WELCOME_TEXTS.en.message;
-  const spokenWelcomeMessage = language === 'ar' ? WELCOME_TEXTS.ar.spokenMessage : WELCOME_TEXTS.en.spokenMessage;
-  const isFirstLanguageRenderRef = useRef(true);
-
-  // Sync preferences from local storage on mount
+export function useMascotGuide({ isChatOpen, isUserInteracting, activeSection, isScrolling, isPageVisible, relocate }: {
+  isChatOpen: boolean; isUserInteracting: boolean; activeSection: SectionId | null
+  isScrolling: boolean; isPageVisible: boolean; relocate: (section: SectionId) => number
+}) {
+  const { language } = useLanguage()
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [isGuidedMode, setIsGuidedMode] = useState(false)
+  const [isMuted, setMuted] = useState(false)
+  const [activeMessage, setActiveMessage] = useState<string | null>(null)
+  const [speechStatus, setSpeechStatus] = useState<NarrationStatus>('idle')
+  const [cycleNumber, setCycleNumber] = useState(0)
+  const bubbleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const retryConsumed = useRef(false)
+  const previousLanguage = useRef(language)
+  const stopBubble = useCallback(() => {
+    clearTimeout(bubbleTimer.current)
+    speechService.stop()
+    setActiveMessage(null)
+  }, [])
   useEffect(() => {
-    setPreferences(guidePreferencesService.getPreferences());
-    speechService.initialize();
-  }, []);
-
-  // Update preferences helper
-  const updatePreferences = useCallback((updates: Partial<GuidePreferences>) => {
-    setPreferences(prev => {
-      const next = { ...prev, ...updates };
-      guidePreferencesService.savePreferences(next);
-      return next;
-    });
-  }, []);
-
-  // Welcome Eligibility logic
+    setIsGuidedMode(cycle.enabled)
+    try { setMuted(JSON.parse(localStorage.getItem(GUIDE_STORAGE_KEY) || '{}').mutedNarration === true) } catch {}
+    const unsubscribe = speechService.subscribeToStatusChanges(setSpeechStatus)
+    return () => { unsubscribe(); clearTimeout(bubbleTimer.current); speechService.stop() }
+  }, [])
   useEffect(() => {
-    // If chat is open, cancel welcome timers and hide welcome
-    if (isChatOpen) {
-      if (welcomeDelayTimerRef.current) clearTimeout(welcomeDelayTimerRef.current);
-      if (welcomeDismissTimerRef.current) clearTimeout(welcomeDismissTimerRef.current);
-      setShowWelcome(false);
-      return;
-    }
-
-    // Only show welcome if they haven't seen it, guide is enabled, and not in guided mode already
-    if (!preferences.hasSeenWelcome && preferences.guideEnabled && !isGuidedMode && guideState.status === 'idle') {
-      welcomeDelayTimerRef.current = setTimeout(() => {
-        setGuideState({ status: 'welcome_prompt' });
-        setShowWelcome(true);
-
-        welcomeDismissTimerRef.current = setTimeout(() => {
-          setShowWelcome(false);
-          setGuideState({ status: 'idle' });
-          updatePreferences({ hasSeenWelcome: true });
-        }, WELCOME_AUTO_DISMISS_MS);
-      }, WELCOME_DELAY_MS);
-    }
-
-    return () => {
-      if (welcomeDelayTimerRef.current) clearTimeout(welcomeDelayTimerRef.current);
-      if (welcomeDismissTimerRef.current) clearTimeout(welcomeDismissTimerRef.current);
-    };
-  }, [preferences.hasSeenWelcome, preferences.guideEnabled, isGuidedMode, guideState.status, isChatOpen, updatePreferences]);
-
-  // Welcome TTS execution
+    if (isChatOpen || !isPageVisible || cycle.welcomeClaimed) return
+    // Delay measured from the navigation, so lazy-loading doesn't add five more seconds.
+    const timer = setTimeout(() => {
+      if (cycle.welcomeClaimed) return
+      cycle.welcomeClaimed = true
+      setShowWelcome(true)
+    }, Math.max(0, WELCOME_DELAY_MS - performance.now()))
+    return () => clearTimeout(timer)
+  }, [isChatOpen, isPageVisible])
+  // Cleanup runs before the new-language effect; no stale callbacks can start old speech.
   useEffect(() => {
-    if (showWelcome && !isChatOpen) {
-      const token = `welcome-${language}`;
-      if (welcomeSpeechConsumedRef.current !== token) {
-        welcomeSpeechConsumedRef.current = token;
-        console.log(`[WELCOME_TTS] trigger. lang=${language}, textLength=${spokenWelcomeMessage.length}`);
-        if (!preferences.mutedNarration && speechService.isAvailable() && speechService.hasVoiceForLanguage(language)) {
-          speechService.speak(spokenWelcomeMessage, language, {
-            onComplete: () => {
-              welcomeSpeechSuccessRef.current = true;
-            },
-          });
-        }
-      }
-    } else {
-      // If prompt hides, do we clear the token? No, we don't want it replaying 
-      // if something forces a re-render. We keep the token per lifecycle.
-      // But if chat opens, we cancel speech (already handled).
+    if (previousLanguage.current !== language) {
+      previousLanguage.current = language
+      stopBubble()
     }
-  }, [showWelcome, language, isChatOpen, preferences.mutedNarration, spokenWelcomeMessage]);
-
-  // Handle chat open state override
+  }, [language, stopBubble])
   useEffect(() => {
-    if (isChatOpen) {
-      if (dwellTimerRef.current) clearTimeout(dwellTimerRef.current);
-      setPendingMessage(null);
-      setGuideState({ status: 'chat_open' });
-    } else if (guideState.status === 'chat_open') {
-      setGuideState(isGuidedMode ? { status: 'observing' } : { status: 'idle' });
-    }
-  }, [isChatOpen, guideState.status, isGuidedMode]);
-
-  // Handle user interaction pause override
+    if (!showWelcome || isChatOpen || !isPageVisible || isMuted) return
+    const timer = setTimeout(() => speechService.play('welcome', language), 0)
+    return () => { clearTimeout(timer); speechService.stop() }
+  }, [showWelcome, isChatOpen, isPageVisible, isMuted, language])
   useEffect(() => {
-    if (isUserInteracting && isGuidedMode && !isChatOpen) {
-      if (dwellTimerRef.current) clearTimeout(dwellTimerRef.current);
-      setGuideState({ status: 'interaction_paused' });
-    } else if (!isUserInteracting && guideState.status === 'interaction_paused') {
-      setGuideState({ status: 'observing' });
-    }
-  }, [isUserInteracting, isGuidedMode, isChatOpen, guideState.status]);
-
-  // Main Section Dwell Engine
+    if (isChatOpen || isScrolling || isUserInteracting || !isPageVisible) stopBubble()
+    if (isChatOpen) { cycle.welcomeClaimed = true; setShowWelcome(false) }
+  }, [isChatOpen, isScrolling, isUserInteracting, isPageVisible, stopBubble])
   useEffect(() => {
-    // Clear previous timer on any dependency change
-    if (dwellTimerRef.current) {
-      clearTimeout(dwellTimerRef.current);
-      dwellTimerRef.current = null;
-    }
-    
-    // Any disruption clears the pending message
-    setPendingMessage(null);
-
-    const isEligibleForDwell = 
-      isGuidedMode &&
-      preferences.guideEnabled &&
-      !isChatOpen &&
-      !isUserInteracting &&
-      speechStatus !== 'speaking' &&
-      activeSection &&
-      GUIDE_SECTIONS[activeSection]?.enabled !== false &&
-      !preferences.narratedSections.includes(activeSection);
-
-    if (isEligibleForDwell) {
-      // Safely transition to section_dwell without adding guideState to dependencies
-      setGuideState(prev => {
-        if (prev.status !== 'section_dwell' || (prev.status === 'section_dwell' && prev.sectionId !== activeSection)) {
-          return { status: 'section_dwell', sectionId: activeSection };
-        }
-        return prev;
-      });
-
-      dwellTimerRef.current = setTimeout(() => {
-        const sectionMeta = GUIDE_SECTIONS[activeSection];
-        if (sectionMeta) {
-          const localizedMessage = language === 'ar' ? sectionMeta.messageAr : sectionMeta.messageEn;
-          setPendingMessage(localizedMessage);
-          setGuideState({ status: 'preparing_message', sectionId: activeSection });
-        }
-      }, DWELL_NARRATION_THRESHOLD_MS);
-    } else {
-      setGuideState(prev => {
-        if (prev.status === 'section_dwell' || prev.status === 'preparing_message') {
-          return { status: 'observing' };
-        }
-        return prev;
-      });
-    }
-
-    return () => {
-      if (dwellTimerRef.current) {
-        clearTimeout(dwellTimerRef.current);
-      }
-    };
-  }, [
-    activeSection,
-    isGuidedMode,
-    preferences.guideEnabled,
-    preferences.narratedSections,
-    isChatOpen,
-    isUserInteracting,
-    speechStatus,
-    language
-  ]);
-
-  // Reduced motion override
-  useEffect(() => {
-    if (prefersReducedMotion && guideState.status !== 'reduced_motion' && !isChatOpen) {
-      // Keep architecture compatible, but don't force state unless needed.
-    }
-  }, [prefersReducedMotion, guideState.status, isChatOpen]);
-
-  // Speech status subscription
-  useEffect(() => {
-    const unsubscribe = speechService.subscribeToStatusChanges((status) => {
-      setSpeechStatus(status);
-      if (status === 'speaking') {
-        setGuideState(prev => {
-          // Note: welcomeSpeechSuccessRef is now set via onComplete callback
-          // in the speak() call, not here. This avoids marking success on
-          // speech start rather than speech completion.
-          return prev.status !== 'chat_open' && prev.status !== 'idle' ? { status: 'speaking' } : prev;
-        });
-      }
-    });
-    return unsubscribe;
-  }, []);
-
-  // Language synchronization (cancel speech if language changes)
-  // Skip the initial mount invocation — speech hasn't started yet and
-  // a mount-time cancel() would be harmless but adds fragility.
-  useEffect(() => {
-    if (isFirstLanguageRenderRef.current) {
-      isFirstLanguageRenderRef.current = false;
-      return;
-    }
-    speechService.cancel();
-  }, [language]);
-
-  // API Methods
+    if (!isGuidedMode || showWelcome || isChatOpen || isScrolling || isUserInteracting || !isPageVisible || !activeSection) return
+    const token = `${language}:${activeSection}`
+    if (cycle.narrated.has(token)) return
+    let narrationTimer: ReturnType<typeof setTimeout>
+    const dwellTimer = setTimeout(() => {
+      const duration = relocate(activeSection)
+      narrationTimer = setTimeout(() => {
+        if (cycle.narrated.has(token)) return
+        cycle.narrated.add(token)
+        const message = messages[activeSection as MessageId][language].text
+        setActiveMessage(message)
+        clearTimeout(bubbleTimer.current)
+        // Visual-only timeout also guards missing native audio callbacks.
+        bubbleTimer.current = setTimeout(() => setActiveMessage(null), Math.max(8000, message.length * 85))
+        if (!isMuted) speechService.play(activeSection, language, {
+          onEnd: () => {
+            clearTimeout(bubbleTimer.current)
+            bubbleTimer.current = setTimeout(() => setActiveMessage(null), 4000)
+          },
+        })
+      }, duration)
+    }, DWELL_NARRATION_THRESHOLD_MS)
+    return () => { clearTimeout(dwellTimer); clearTimeout(narrationTimer) }
+  }, [activeSection, isGuidedMode, showWelcome, isChatOpen, isScrolling, isUserInteracting, isPageVisible, language, isMuted, cycleNumber, relocate])
   const acceptGuide = useCallback(() => {
-    setShowWelcome(false);
-    setIsGuidedMode(true);
-    setGuideState({ status: 'observing' });
-    updatePreferences({ hasSeenWelcome: true });
-    
-    // Stop any active welcome speech
-    speechService.cancel();
-
-    // Prepare speech service for future use
-    speechService.initialize();
-
-    // If welcome speech didn't succeed (e.g. blocked by autoplay), retry it now with user gesture
-    if (!welcomeSpeechSuccessRef.current && !preferences.mutedNarration && speechService.isAvailable() && speechService.hasVoiceForLanguage(language)) {
-      speechService.speak(spokenWelcomeMessage, language, {
-        onComplete: () => {
-          welcomeSpeechSuccessRef.current = true;
-        },
-      });
-    }
-  }, [updatePreferences, preferences.mutedNarration, spokenWelcomeMessage, language]);
-
+    stopBubble() // Starting a tour never restarts the welcome sentence.
+    cycle.enabled = true
+    setShowWelcome(false)
+    setIsGuidedMode(true)
+  }, [stopBubble])
   const dismissGuide = useCallback(() => {
-    setShowWelcome(false);
-    setIsGuidedMode(false);
-    setGuideState({ status: 'dismissed' });
-    updatePreferences({ hasSeenWelcome: true });
-    
-    // Stop any active welcome speech
-    speechService.cancel();
-  }, [updatePreferences]);
-
-  const toggleMute = useCallback(() => {
-    updatePreferences({ mutedNarration: !preferences.mutedNarration });
-  }, [preferences.mutedNarration, updatePreferences]);
-
+    stopBubble()
+    cycle.welcomeClaimed = true
+    cycle.enabled = false
+    setShowWelcome(false)
+    setIsGuidedMode(false)
+  }, [stopBubble])
   const startGuideCycle = useCallback(() => {
-    const cycleId = Date.now().toString();
-    setIsGuidedMode(true);
-    setGuideState({ status: 'observing' });
-    updatePreferences({ 
-      narratedSections: [],
-      guideCycleId: cycleId 
-    });
-  }, [updatePreferences]);
-
-  const resetGuideCycle = useCallback(() => {
-    setIsGuidedMode(false);
-    setGuideState({ status: 'idle' });
-    updatePreferences({ narratedSections: [] });
-  }, [updatePreferences]);
-
-  return {
-    guideState,
-    isGuidedMode,
-    isMuted: preferences.mutedNarration,
-    isNarrationEligible: guideState.status === 'preparing_message',
-    pendingMessage,
-    showWelcome,
-    welcomeMessage,
-    activeSection,
-    narratedSections: preferences.narratedSections,
-    acceptGuide,
-    dismissGuide,
-    toggleMute,
-    startGuideCycle,
-    resetGuideCycle,
-    speechStatus
-  };
+    stopBubble()
+    cycle.narrated.clear()
+    cycle.enabled = true
+    cycle.welcomeClaimed = true
+    setShowWelcome(false)
+    setIsGuidedMode(true)
+    setCycleNumber(n => n + 1)
+  }, [stopBubble])
+  const toggleMute = useCallback(() => {
+    const next = !isMuted
+    setMuted(next)
+    if (next) speechService.stop()
+    try { localStorage.setItem(GUIDE_STORAGE_KEY, JSON.stringify({ mutedNarration: next })) } catch {}
+  }, [isMuted])
+  const retryWelcome = useCallback(() => {
+    if (retryConsumed.current || !showWelcome || speechService.isPlaying) return
+    retryConsumed.current = true
+    speechService.play('welcome', language)
+  }, [showWelcome, language])
+  return { showWelcome, welcomeMessage: messages.welcome[language].text, isGuidedMode, isMuted,
+    activeMessage, speechStatus, acceptGuide, dismissGuide, startGuideCycle, toggleMute,
+    dismissBubble: stopBubble, retryWelcome, canRetryWelcome: speechStatus === 'blocked' && !retryConsumed.current }
 }

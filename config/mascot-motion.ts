@@ -53,13 +53,13 @@ export const RELOCATION_COOLDOWN_MS = 8_000
 // ── Idle Animation Constants ─────────────────────────────────────────────────
 
 /** Amplitude of the gentle vertical float in pixels */
-export const IDLE_FLOAT_AMPLITUDE = 4
+export const IDLE_FLOAT_AMPLITUDE = 3
 
 /** Duration of one full float cycle in seconds */
-export const IDLE_FLOAT_DURATION = 3.5
+export const IDLE_FLOAT_DURATION = 7
 
 /** Maximum rotation during idle tilt in degrees */
-export const IDLE_TILT_DEGREES = 1.5
+export const IDLE_TILT_DEGREES = 0.5
 
 // ── Attention Micro-Motion Constants ─────────────────────────────────────────
 
@@ -111,13 +111,13 @@ export const ANCHOR_DEFINITIONS: Record<AnchorZone, AnchorDefinition> = {
   },
   bottom_left: {
     xFraction: 0.04,
-    yFraction: 0.88,
+    yFraction: 0.96,
     safeMargin: 16,
     bubbleDirection: "right",
   },
   bottom_right: {
     xFraction: 0.96,
-    yFraction: 0.88,
+    yFraction: 0.96,
     safeMargin: 16,
     bubbleDirection: "left",
   },

@@ -4,6 +4,7 @@ import AdminSidebar from "@/components/admin/sidebar"
 import AdminTopbar from "@/components/admin/topbar"
 
 export const metadata = {
+  robots: { index: false, follow: false },
   title: "Admin Dashboard | DaforLance",
   description: "Manage your DaforLance website content",
 }

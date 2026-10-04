@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion"
 import { useLanguage } from "@/lib/i18n/language-context"
-import * as LucideIcons from "lucide-react"
-import type { LucideIcon } from "lucide-react"
+import type { ReactNode } from "react"
 
 interface ServiceData {
   id: string
   icon: string
+  iconNode?: ReactNode
   titleAr: string
   titleEn: string
   descriptionAr: string | null
@@ -22,10 +22,6 @@ interface ServicesProps {
   services?: ServiceData[]
 }
 
-function getIconComponent(name: string): LucideIcon {
-  return (LucideIcons[name as keyof typeof LucideIcons] as LucideIcon) ?? LucideIcons.Sparkles
-}
-
 function ServiceCard({
   service,
   index,
@@ -37,7 +33,6 @@ function ServiceCard({
   isRTL: boolean
   language: "ar" | "en"
 }) {
-  const Icon = getIconComponent(service.icon)
   const title = language === "ar" ? service.titleAr : service.titleEn
   const description = language === "ar" ? (service.descriptionAr || "") : (service.descriptionEn || "")
 
@@ -57,7 +52,7 @@ function ServiceCard({
         whileHover={{ scale: 1.05, rotate: 5 }}
         transition={{ type: "spring", stiffness: 400, damping: 15 }}
       >
-        <Icon className="w-7 h-7 lg:w-8 lg:h-8 text-[#fe6a52] group-hover:text-white transition-colors duration-400" aria-hidden="true" />
+        {service.iconNode}
       </motion.div>
 
       <div className={isRTL ? "text-right" : "text-left"}>

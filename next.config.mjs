@@ -1,11 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
+  poweredByHeader: false,
+  images: { formats: ['image/webp'] },
 }
-
 export default nextConfig
