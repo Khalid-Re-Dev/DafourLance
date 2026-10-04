@@ -75,9 +75,9 @@ export const ATTENTION_DURATION_S = 0.6
 // ── Responsive Mascot Sizing ─────────────────────────────────────────────────
 
 export const MASCOT_SIZE: Record<DeviceCategory, number> = {
-  mobile: 56,
-  tablet: 64,
-  desktop: 72,
+  mobile: 72,
+  tablet: 80,
+  desktop: 88,
 }
 
 // ── Anchor Zone Definitions ──────────────────────────────────────────────────

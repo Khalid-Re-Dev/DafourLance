@@ -38,7 +38,7 @@ export function MascotSpeechBubble({
   const prefersReducedMotion = useReducedMotion();
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false)
-  const [placement, setPlacement] = useState({ vertical: 'top', horizontal: 'left', x: 16, y: 16 })
+  const [placement, setPlacement] = useState({ vertical: 'top', horizontal: 'left', x: 16, y: 16, arrowX: 32, maxHeight: 600 })
   useEffect(() => { setMounted(true) }, [])
   useLayoutEffect(() => {
     if (!visible || !mounted) return
@@ -48,21 +48,23 @@ export function MascotSpeechBubble({
       const top = (viewport?.offsetTop || 0) + 16
       const right = left + (viewport?.width || window.innerWidth) - 32
       const bottom = top + (viewport?.height || window.innerHeight) - 32
-      const width = bubbleRef.current?.offsetWidth || 280
+      const width = bubbleRef.current?.offsetWidth || 320
       const height = bubbleRef.current?.offsetHeight || 140
       const above = targetPosition.y - height - 16
       const below = targetPosition.y + mascotSize + 16
       const vertical = above >= top ? 'top' : 'bottom'
       const x = Math.max(left, Math.min(isRTL ? targetPosition.x : targetPosition.x + mascotSize - width, right - width))
       const y = Math.max(top, Math.min(vertical === 'top' ? above : below, bottom - height))
-      setPlacement({ vertical, horizontal: isRTL ? 'left' : 'right', x, y })
+      const arrowX = Math.max(20, Math.min(targetPosition.x + mascotSize / 2 - x, width - 20))
+      setPlacement({ vertical, horizontal: isRTL ? 'left' : 'right', x, y, arrowX, maxHeight: bottom - top })
     }
     update()
     const observer = new ResizeObserver(update)
     if (bubbleRef.current) observer.observe(bubbleRef.current)
     window.addEventListener('resize', update)
     window.visualViewport?.addEventListener('resize', update)
-    return () => { observer.disconnect(); window.removeEventListener('resize', update); window.visualViewport?.removeEventListener('resize', update) }
+    window.visualViewport?.addEventListener('scroll', update)
+    return () => { observer.disconnect(); window.removeEventListener('resize', update); window.visualViewport?.removeEventListener('resize', update); window.visualViewport?.removeEventListener('scroll', update) }
   }, [visible, mounted, message, targetPosition.x, targetPosition.y, isRTL, mascotSize])
 
   // Animations
@@ -103,9 +105,10 @@ export function MascotSpeechBubble({
       {visible && (
         <motion.div
           ref={bubbleRef}
-          className="fixed z-50 w-[280px] max-w-[calc(100vw-32px)]"
+          data-guide-bubble
+          className="fixed z-50 w-[320px] max-w-[calc(100vw-32px)]"
           dir={isRTL ? 'rtl' : 'ltr'}
-          style={{ left: placement.x, top: placement.y, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto' }}
+          style={{ left: placement.x, top: placement.y }}
           variants={variants as any}
           initial="hidden"
           animate="visible"
@@ -114,7 +117,8 @@ export function MascotSpeechBubble({
           aria-live="polite"
         >
           {/* Bubble Container */}
-          <div className="relative bg-[#1f2b3b] text-white rounded-2xl p-4 shadow-xl border border-[#2d3e50]">
+          <div data-guide-bubble-content className="relative bg-[#1f2b3b] text-white rounded-2xl p-4 shadow-lg border border-[#2d3e50]"
+            style={{ maxHeight: placement.maxHeight, overflowY: 'auto', overflowWrap: 'anywhere' }}>
             
             {/* Header / Controls */}
             <div className={`flex justify-between items-start mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -157,16 +161,15 @@ export function MascotSpeechBubble({
               {message}
             </p>
             <NarrationFeedback language={isRTL ? 'ar' : 'en'} status={speechStatus} error={speechError} isMuted={isMuted} onPlay={onPlay} />
-
-            {/* Pointer / Arrow */}
+          </div>
+            {/* Keep the decorative pointer outside the scrollable content. */}
             <div 
-              className={`absolute w-3 h-3 bg-[#1f2b3b] border-[#2d3e50] transform rotate-45 ${
+              aria-hidden="true"
+              style={{ left: placement.arrowX - 6 }}
+              className={`pointer-events-none absolute w-3 h-3 bg-[#1f2b3b] border-[#2d3e50] transform rotate-45 ${
                 placement.vertical === 'top' ? 'bottom-[-6px] border-b border-r' : 'top-[-6px] border-t border-l'
-              } ${
-                placement.horizontal === 'right' ? 'right-6' : 'left-6'
               }`}
             />
-          </div>
         </motion.div>
       )}
     </AnimatePresence>, document.body

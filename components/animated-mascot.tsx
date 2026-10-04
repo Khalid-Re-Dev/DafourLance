@@ -17,8 +17,8 @@ import { useState, useRef, useEffect, useCallback } from "react"
  */
 
 // ── Asset paths (served from /public/mascot/) ─────────────────────────────────
-const MASCOT_WEBM = "/mascot/robot-mascot.webm"
-const MASCOT_POSTER = "/mascot/robot-mascot-poster.webp"
+const MASCOT_WEBM = "/mascot/robot-mascot.webm?v=full-frame-2"
+const MASCOT_POSTER = "/mascot/robot-mascot-poster.webp?v=full-frame-2"
 
 // ── Inline SVG fallback (matches the original RobotIcon) ──────────────────────
 function FallbackRobotSVG({ size }: { size: number }) {
@@ -151,7 +151,7 @@ export default function AnimatedMascot({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
+    overflow: "visible",
     flexShrink: 0,
   }
 
