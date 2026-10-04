@@ -39,7 +39,8 @@ export default function PageContentClient({
   }, [isRTL, language])
 
   return (
-    <main dir={isRTL ? "rtl" : "ltr"} className="min-h-screen bg-background overflow-x-hidden">
+    <main id="main-content" tabIndex={-1} dir={isRTL ? "rtl" : "ltr"} className="min-h-screen bg-background overflow-x-hidden">
+      <a className="skip-link" href="#hero">{language === "ar" ? "تخطَّ إلى المحتوى" : "Skip to content"}</a>
       <Header navItems={navItems} />
       <Hero siteTexts={siteTexts} />
       <About siteTexts={siteTexts} />

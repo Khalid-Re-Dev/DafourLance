@@ -4,13 +4,18 @@ const bcrypt = require("bcryptjs")
 const prisma = new PrismaClient()
 
 async function main() {
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD
+  if (!adminPassword || adminPassword.length < 12 || Buffer.byteLength(adminPassword, "utf8") > 72) {
+    throw new Error("Set SEED_ADMIN_PASSWORD to a unique password of at least 12 characters and at most 72 UTF-8 bytes before seeding.")
+  }
+
   console.log("🚀 Starting comprehensive database seed...\n")
 
   // ─────────────────────────────────────────────────
   // 1. Admin User
   // ─────────────────────────────────────────────────
   console.log("👤 Seeding admin user...")
-  const hashedPassword = await bcrypt.hash("Admin123!", 12)
+  const hashedPassword = await bcrypt.hash(adminPassword, 12)
   await prisma.user.upsert({
     where: { email: "admin@daforlance.com" },
     update: {},

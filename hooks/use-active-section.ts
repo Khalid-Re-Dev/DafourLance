@@ -1,83 +1,43 @@
-// ═══════════════════════════════════════════════════════════════════════════════
-// hooks/use-active-section.ts — IntersectionObserver-based section detection
-//
-// Strategy: HIGHEST VISIBILITY RATIO
-// Tracks all known landing-page sections and reports which one occupies the
-// most viewport area. Includes hysteresis to prevent rapid flickering when
-// two sections share the viewport near a boundary.
-// ═══════════════════════════════════════════════════════════════════════════════
+import { useEffect, useState } from 'react'
+import type { SectionId } from '@/types/mascot'
+import { OBSERVED_SECTION_IDS, SCROLL_DEBOUNCE_MS } from '@/config/mascot-motion'
 
-import { useState, useEffect, useRef, useCallback } from "react"
-import type { SectionId } from "@/types/mascot"
-import {
-  OBSERVED_SECTION_IDS,
-  SECTION_MIN_VISIBILITY,
-  SECTION_OBSERVER_THRESHOLDS,
-} from "@/config/mascot-motion"
-
-export interface ActiveSectionResult {
-  /** The section with the highest visibility, or null if none qualify */
-  activeSection: SectionId | null
-}
-
-/**
- * Observes all known page sections via IntersectionObserver and returns the
- * one with the greatest visibility ratio, provided it exceeds the minimum
- * threshold (`SECTION_MIN_VISIBILITY`).
- *
- * Standalone hook — no dependency on the motion system.
- */
-export function useActiveSection(): ActiveSectionResult {
+/** One passive scroll subscription. Read geometry only after scrolling settles. */
+export function useActiveSection() {
   const [activeSection, setActiveSection] = useState<SectionId | null>(null)
-  const visibilityRef = useRef<Map<SectionId, number>>(new Map())
-
-  const resolveActive = useCallback(() => {
-    let bestSection: SectionId | null = null
-    let bestRatio = 0
-
-    visibilityRef.current.forEach((ratio, section) => {
-      if (ratio > bestRatio && ratio >= SECTION_MIN_VISIBILITY) {
-        bestRatio = ratio
-        bestSection = section
-      }
-    })
-
-    setActiveSection(bestSection)
-  }, [])
-
+  const [isScrolling, setIsScrolling] = useState(false)
+  const [isPageVisible, setIsPageVisible] = useState(true)
   useEffect(() => {
-    // Collect DOM elements for all known sections
-    const elements: { id: SectionId; el: Element }[] = []
-    for (const id of OBSERVED_SECTION_IDS) {
-      const el = document.getElementById(id)
-      if (el) {
-        elements.push({ id, el })
+    let timer: ReturnType<typeof setTimeout>
+    const measure = () => {
+      const vh = window.visualViewport?.height ?? window.innerHeight
+      let best: SectionId | null = null
+      let score = 0
+      for (const id of OBSERVED_SECTION_IDS) {
+        const rect = document.getElementById(id)?.getBoundingClientRect()
+        if (!rect) continue
+        const visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 80))
+        if (visible > score) { score = visible; best = id }
       }
+      setActiveSection(best)
+      setIsScrolling(false)
     }
-
-    if (elements.length === 0) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const id = entry.target.id as SectionId
-          visibilityRef.current.set(id, entry.intersectionRatio)
-        }
-        resolveActive()
-      },
-      {
-        threshold: SECTION_OBSERVER_THRESHOLDS,
-      },
-    )
-
-    for (const { el } of elements) {
-      observer.observe(el)
+    const onScroll = () => {
+      setIsScrolling(true)
+      clearTimeout(timer)
+      timer = setTimeout(measure, SCROLL_DEBOUNCE_MS)
     }
-
+    const visibility = () => { setIsPageVisible(!document.hidden); if (!document.hidden) measure() }
+    measure()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    document.addEventListener('visibilitychange', visibility)
     return () => {
-      observer.disconnect()
+      clearTimeout(timer)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      document.removeEventListener('visibilitychange', visibility)
     }
-  }, [resolveActive])
-
-  return { activeSection }
+  }, [])
+  return { activeSection, isScrolling, isPageVisible }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/i18n/language-context"
 
@@ -42,7 +43,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
           {/* Image Side with Decorative Elements */}
           <motion.div
             className="relative w-full lg:w-1/2 flex justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
@@ -67,17 +68,18 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
             {/* Main Image — enlarged for better presence */}
             <motion.div
               className="relative z-10 bg-[#f5bc41] rounded-[32px] overflow-hidden w-[280px] h-[330px] lg:w-[340px] lg:h-[400px] shadow-2xl"
-              initial={{ y: 30, opacity: 0 }}
+              initial={false}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.6 }}
               whileHover={{ y: -8, scale: 1.02 }}
             >
-              <motion.img
+              <Image
                 src="/professional-arab-man-in-blue-shirt-holding-tablet.jpg"
-                alt="Professional consultant"
+                alt={language === "ar" ? "مستشار يحمل جهازًا لوحيًا" : "Consultant holding a tablet"}
+                fill
+                sizes="(min-width: 1024px) 340px, 280px"
+                preload
                 className="w-full h-full object-cover"
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
               />
             </motion.div>
 
@@ -139,7 +141,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
           {/* Content Side */}
           <motion.div
             className={`w-full lg:w-1/2 ${isRTL ? "text-right" : "text-left"}`}
-            initial={{ opacity: 0, x: isRTL ? 50 : -50 }}
+            initial={false}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
@@ -158,7 +160,7 @@ export default function Hero({ siteTexts = {} }: HeroProps) {
             
             <motion.div
               className={`flex flex-wrap gap-4 ${isRTL ? "justify-end" : "justify-start"}`}
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4 }}
             >

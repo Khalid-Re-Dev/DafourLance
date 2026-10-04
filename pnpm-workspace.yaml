@@ -1,4 +1,5 @@
-ignoredBuiltDependencies:
-  - '@prisma/engines'
-  - prisma
-  - sharp
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  prisma: true
+  sharp: true

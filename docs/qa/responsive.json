@@ -1,0 +1,153 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "lang": "en",
+    "dir": "ltr",
+    "welcome": {
+      "x": 496,
+      "y": 32,
+      "w": 448,
+      "h": 186,
+      "safe": true
+    },
+    "mascot": {
+      "x": 1343.9195556640625,
+      "y": 747.5194702148438,
+      "w": 76.9609375,
+      "h": 76.9610595703125,
+      "safe": true
+    },
+    "dialogs": 1,
+    "overflow": false,
+    "collision": [],
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "height": 800,
+    "lang": "en",
+    "dir": "ltr",
+    "welcome": {
+      "x": 416,
+      "y": 32,
+      "w": 448,
+      "h": 186,
+      "safe": true
+    },
+    "mascot": {
+      "x": 1189.5189208984375,
+      "y": 659.5189208984375,
+      "w": 76.962158203125,
+      "h": 76.962158203125,
+      "safe": true
+    },
+    "dialogs": 1,
+    "overflow": false,
+    "collision": [],
+    "errors": []
+  },
+  {
+    "width": 1024,
+    "height": 768,
+    "lang": "en",
+    "dir": "ltr",
+    "welcome": {
+      "x": 288,
+      "y": 32,
+      "w": 448,
+      "h": 186,
+      "safe": true
+    },
+    "mascot": {
+      "x": 941.7948608398438,
+      "y": 635.6348876953125,
+      "w": 68.4102783203125,
+      "h": 68.4102783203125,
+      "safe": true
+    },
+    "dialogs": 1,
+    "overflow": false,
+    "collision": [],
+    "errors": []
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "lang": "en",
+    "dir": "ltr",
+    "welcome": {
+      "x": 160,
+      "y": 32,
+      "w": 448,
+      "h": 186,
+      "safe": true
+    },
+    "mascot": {
+      "x": 685.7944946289062,
+      "y": 860.9144897460938,
+      "w": 68.4110107421875,
+      "h": 68.4110107421875,
+      "safe": true
+    },
+    "dialogs": 1,
+    "overflow": false,
+    "collision": [],
+    "errors": []
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "lang": "en",
+    "dir": "ltr",
+    "welcome": {
+      "x": 16,
+      "y": 24,
+      "w": 358,
+      "h": 186,
+      "safe": true
+    },
+    "mascot": {
+      "x": 316.0699157714844,
+      "y": 706.7899169921875,
+      "w": 59.86016845703125,
+      "h": 59.860107421875,
+      "safe": true
+    },
+    "dialogs": 1,
+    "overflow": false,
+    "collision": [],
+    "errors": []
+  },
+  {
+    "width": 844,
+    "height": 390,
+    "lang": "en",
+    "dir": "ltr",
+    "welcome": {
+      "x": 198,
+      "y": 32,
+      "w": 448,
+      "h": 186,
+      "safe": true
+    },
+    "mascot": {
+      "x": 761.7946166992188,
+      "y": 285.7945861816406,
+      "w": 68.4107666015625,
+      "h": 68.41082763671875,
+      "safe": true
+    },
+    "dialogs": 1,
+    "overflow": false,
+    "collision": [],
+    "errors": []
+  },
+  {
+    "nojs": {
+      "lang": "en",
+      "h1": "Towards a Better Digital & Professional Experience",
+      "title": "Dafourlance — Digital Services & Consulting"
+    }
+  }
+]

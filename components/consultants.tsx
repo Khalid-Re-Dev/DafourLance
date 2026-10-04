@@ -67,7 +67,7 @@ function ConsultantCard({
         y: -6,
         boxShadow: "0 16px 50px rgba(0,0,0,0.18)",
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      transition={{ type: "spring" as const, stiffness: 300, damping: 20 }}
     >
       <svg
         className="absolute inset-0 w-full h-full"
@@ -84,10 +84,10 @@ function ConsultantCard({
         <motion.div
           className="bg-[#1f2b3b] flex items-center justify-center border-[3px] border-white w-[160px] h-[160px] rounded-[22px] shadow-[0_8px_25px_rgba(0,0,0,0.25)] overflow-hidden"
           whileHover={{ scale: 1.03 }}
-          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}
         >
           {consultant.imageUrl ? (
-            <img
+            <img loading="lazy" decoding="async"
               src={consultant.imageUrl || "/placeholder.svg"}
               alt={consultant.name}
               className="w-full h-full object-cover"
@@ -202,7 +202,7 @@ export default function Consultants({ consultants = [], siteTexts = {} }: Consul
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { type: "spring", stiffness: 100, damping: 15, duration: 0.5 },
+      transition: { type: "spring" as const, stiffness: 100, damping: 15, duration: 0.5 },
     },
   }
 

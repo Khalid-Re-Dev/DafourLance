@@ -1,0 +1,42 @@
+{
+  "tool": "Lighthouse 12.8.2",
+  "url": "http://localhost:3000/en",
+  "conditions": "Single independent local simulated-mobile run; no production database, no configured SITE_URL; not field data.",
+  "scores": {
+    "performance": 93,
+    "accessibility": 96,
+    "seo": 66
+  },
+  "metrics": {
+    "largest-contentful-paint": {
+      "value": 3206.7025,
+      "display": "3.2\u00a0s"
+    },
+    "cumulative-layout-shift": {
+      "value": 0,
+      "display": "0"
+    },
+    "total-blocking-time": {
+      "value": 54,
+      "display": "50\u00a0ms"
+    },
+    "first-contentful-paint": {
+      "value": 1219.135,
+      "display": "1.2\u00a0s"
+    }
+  },
+  "remainingFailedBinaryAudits": [
+    {
+      "id": "color-contrast",
+      "title": "Background and foreground colors do not have a sufficient contrast ratio."
+    },
+    {
+      "id": "is-crawlable",
+      "title": "Page is blocked from indexing"
+    },
+    {
+      "id": "bf-cache",
+      "title": "Page prevented back/forward cache restoration"
+    }
+  ]
+}

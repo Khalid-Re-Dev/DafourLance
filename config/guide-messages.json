@@ -1,0 +1,82 @@
+{
+  "welcome": {
+    "ar": {
+      "text": "مرحباً بك في Dafourlance. هل ترغب أن أعرّفك سريعاً على الموقع؟",
+      "spoken": "مرحباً بك في دافورلانس. هل ترغب أن أعرّفك سريعاً على الموقع؟"
+    },
+    "en": {
+      "text": "Welcome to Dafourlance. Would you like me to give you a quick tour?",
+      "spoken": "Welcome to Da four lance. Would you like me to give you a quick tour?"
+    }
+  },
+  "hero": {
+    "ar": {
+      "text": "مرحباً بك في دافورلانس. نحن نقدم حلولاً متكاملة لتحويل رؤيتك إلى واقع رقمي.",
+      "spoken": "مرحباً بك في دافورلانس. نحن نقدم حلولاً متكاملة لتحويل رؤيتك إلى واقع رقمي."
+    },
+    "en": {
+      "text": "Welcome to Dafourlance. We provide comprehensive solutions to turn your vision into digital reality.",
+      "spoken": "Welcome to Da four lance. We provide comprehensive solutions to turn your vision into digital reality."
+    }
+  },
+  "about": {
+    "ar": {
+      "text": "تعرف على دافورلانس، فريقنا الشغوف وخبرتنا في تقديم أفضل الخدمات الاستشارية.",
+      "spoken": "تعرف على دافورلانس، فريقنا الشغوف وخبرتنا في تقديم أفضل الخدمات الاستشارية."
+    },
+    "en": {
+      "text": "Discover Dafourlance, our passionate team, and our expertise in providing the best consulting services.",
+      "spoken": "Discover Da four lance, our passionate team, and our expertise in providing the best consulting services."
+    }
+  },
+  "services": {
+    "ar": {
+      "text": "نقدم مجموعة متنوعة من الخدمات من الاستشارات إلى التطوير لضمان نجاح مشروعك.",
+      "spoken": "نقدم مجموعة متنوعة من الخدمات من الاستشارات إلى التطوير لضمان نجاح مشروعك."
+    },
+    "en": {
+      "text": "We offer a variety of services from consulting to development to ensure your project's success.",
+      "spoken": "We offer a variety of services from consulting to development to ensure your project's success."
+    }
+  },
+  "consultants": {
+    "ar": {
+      "text": "نخبة من المستشارين والخبراء جاهزون لتقديم أفضل الاستراتيجيات والحلول.",
+      "spoken": "نخبة من المستشارين والخبراء جاهزون لتقديم أفضل الاستراتيجيات والحلول."
+    },
+    "en": {
+      "text": "An elite group of consultants and experts ready to provide the best strategies and solutions.",
+      "spoken": "An elite group of consultants and experts ready to provide the best strategies and solutions."
+    }
+  },
+  "projects": {
+    "ar": {
+      "text": "تصفح سابقة أعمالنا وتعرف على قصص نجاح مشاريعنا المتميزة.",
+      "spoken": "تصفح سابقة أعمالنا وتعرف على قصص نجاح مشاريعنا المتميزة."
+    },
+    "en": {
+      "text": "Browse our portfolio and discover the success stories of our outstanding projects.",
+      "spoken": "Browse our portfolio and discover the success stories of our outstanding projects."
+    }
+  },
+  "partners": {
+    "ar": {
+      "text": "نعتز بشراكاتنا الاستراتيجية مع نخبة من المؤسسات لتقديم أفضل النتائج.",
+      "spoken": "نعتز بشراكاتنا الاستراتيجية مع نخبة من المؤسسات لتقديم أفضل النتائج."
+    },
+    "en": {
+      "text": "We pride ourselves on our strategic partnerships with leading organizations to deliver the best results.",
+      "spoken": "We pride ourselves on our strategic partnerships with leading organizations to deliver the best results."
+    }
+  },
+  "contact": {
+    "ar": {
+      "text": "تواصل معنا اليوم لبدء رحلة نجاحك الرقمي. نحن هنا لمساعدتك.",
+      "spoken": "تواصل معنا اليوم لبدء رحلة نجاحك الرقمي. نحن هنا لمساعدتك."
+    },
+    "en": {
+      "text": "Contact us today to start your digital success journey. We are here to help.",
+      "spoken": "Contact us today to start your digital success journey. We are here to help."
+    }
+  }
+}

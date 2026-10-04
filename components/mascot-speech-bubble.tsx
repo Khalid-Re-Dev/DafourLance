@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, X } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
@@ -29,36 +30,33 @@ export function MascotSpeechBubble({
 }: MascotSpeechBubbleProps) {
   const prefersReducedMotion = useReducedMotion();
   const bubbleRef = useRef<HTMLDivElement>(null);
-  const [placement, setPlacement] = useState({ vertical: 'top', horizontal: isRTL ? 'left' : 'right' });
-
-  useEffect(() => {
-    if (!visible) return;
-    
-    const updatePlacement = () => {
-      const vw = typeof window !== 'undefined' ? window.innerWidth : 1000;
-      
-      const el = bubbleRef.current;
-      const bubbleW = el ? el.offsetWidth : (vw < 640 ? 240 : 280);
-      const bubbleH = el ? el.offsetHeight : 120;
-      
-      let horiz = isRTL ? 'left' : 'right';
-      let vert = 'top';
-      
-      if (horiz === 'right') {
-        if (targetPosition.x + mascotSize - bubbleW < 10) horiz = 'left';
-      } else {
-        if (targetPosition.x + bubbleW > vw - 10) horiz = 'right';
-      }
-      
-      if (targetPosition.y - bubbleH - 20 < 10) vert = 'bottom';
-      
-      setPlacement({ vertical: vert, horizontal: horiz });
-    };
-
-    updatePlacement();
-    const timer = setTimeout(updatePlacement, 50);
-    return () => clearTimeout(timer);
-  }, [visible, message, targetPosition.x, targetPosition.y, isRTL, mascotSize]);
+  const [mounted, setMounted] = useState(false)
+  const [placement, setPlacement] = useState({ vertical: 'top', horizontal: 'left', x: 16, y: 16 })
+  useEffect(() => { setMounted(true) }, [])
+  useLayoutEffect(() => {
+    if (!visible || !mounted) return
+    const update = () => {
+      const viewport = window.visualViewport
+      const left = (viewport?.offsetLeft || 0) + 16
+      const top = (viewport?.offsetTop || 0) + 16
+      const right = left + (viewport?.width || window.innerWidth) - 32
+      const bottom = top + (viewport?.height || window.innerHeight) - 32
+      const width = bubbleRef.current?.offsetWidth || 280
+      const height = bubbleRef.current?.offsetHeight || 140
+      const above = targetPosition.y - height - 16
+      const below = targetPosition.y + mascotSize + 16
+      const vertical = above >= top ? 'top' : 'bottom'
+      const x = Math.max(left, Math.min(isRTL ? targetPosition.x : targetPosition.x + mascotSize - width, right - width))
+      const y = Math.max(top, Math.min(vertical === 'top' ? above : below, bottom - height))
+      setPlacement({ vertical, horizontal: isRTL ? 'left' : 'right', x, y })
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    if (bubbleRef.current) observer.observe(bubbleRef.current)
+    window.addEventListener('resize', update)
+    window.visualViewport?.addEventListener('resize', update)
+    return () => { observer.disconnect(); window.removeEventListener('resize', update); window.visualViewport?.removeEventListener('resize', update) }
+  }, [visible, mounted, message, targetPosition.x, targetPosition.y, isRTL, mascotSize])
 
   // Animations
   const bubbleVariants = {
@@ -73,9 +71,7 @@ export function MascotSpeechBubble({
       scale: 1, 
       y: 0,
       transition: { 
-        type: 'spring',
-        stiffness: 260,
-        damping: 20
+        duration: 0.2, ease: 'easeOut'
       }
     },
     exit: { 
@@ -94,16 +90,15 @@ export function MascotSpeechBubble({
 
   const variants = prefersReducedMotion ? reducedMotionVariants : bubbleVariants;
 
-  return (
+  if (!mounted) return null
+  return createPortal(
     <AnimatePresence>
       {visible && (
         <motion.div
           ref={bubbleRef}
-          className={`absolute z-40 w-[240px] sm:w-[280px] ${
-            placement.vertical === 'top' ? 'bottom-full mb-4' : 'top-full mt-4'
-          } ${
-            placement.horizontal === 'right' ? 'right-0' : 'left-0'
-          } max-w-[calc(100vw-32px)]`}
+          className="fixed z-50 w-[280px] max-w-[calc(100vw-32px)]"
+          dir={isRTL ? 'rtl' : 'ltr'}
+          style={{ left: placement.x, top: placement.y, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto' }}
           variants={variants as any}
           initial="hidden"
           animate="visible"
@@ -120,9 +115,9 @@ export function MascotSpeechBubble({
               <div className="flex items-center h-5">
                 {isSpeaking && !isMuted && (
                   <div className="flex gap-1 items-center">
-                    <motion.div className="w-1 h-3 bg-[#fe6a52] rounded-full" animate={{ height: [12, 6, 12] }} transition={{ repeat: Infinity, duration: 0.5 }} />
-                    <motion.div className="w-1 h-2 bg-[#fe6a52] rounded-full" animate={{ height: [8, 12, 8] }} transition={{ repeat: Infinity, duration: 0.5, delay: 0.1 }} />
-                    <motion.div className="w-1 h-4 bg-[#fe6a52] rounded-full" animate={{ height: [16, 8, 16] }} transition={{ repeat: Infinity, duration: 0.5, delay: 0.2 }} />
+                    <motion.div className="w-1 h-3 bg-[#fe6a52] rounded-full" animate={prefersReducedMotion ? {} : { scaleY: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 0.5 }} />
+                    <motion.div className="w-1 h-2 bg-[#fe6a52] rounded-full" animate={prefersReducedMotion ? {} : { scaleY: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 0.5, delay: 0.1 }} />
+                    <motion.div className="w-1 h-4 bg-[#fe6a52] rounded-full" animate={prefersReducedMotion ? {} : { scaleY: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 0.5, delay: 0.2 }} />
                   </div>
                 )}
               </div>
@@ -132,7 +127,7 @@ export function MascotSpeechBubble({
                 {onMuteToggle && (
                   <button 
                     onClick={onMuteToggle}
-                    className="hover:text-white transition-colors"
+                    className="min-h-8 min-w-8 flex items-center justify-center hover:text-white transition-colors"
                     aria-label={isMuted ? (isRTL ? 'تفعيل الصوت' : 'Unmute') : (isRTL ? 'كتم الصوت' : 'Mute')}
                   >
                     {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
@@ -141,7 +136,7 @@ export function MascotSpeechBubble({
                 {onDismiss && (
                   <button 
                     onClick={onDismiss}
-                    className="hover:text-white transition-colors"
+                    className="min-h-8 min-w-8 flex items-center justify-center hover:text-white transition-colors"
                     aria-label={isRTL ? 'إغلاق' : 'Close'}
                   >
                     <X size={14} />
@@ -166,6 +161,6 @@ export function MascotSpeechBubble({
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>, document.body
   );
 }

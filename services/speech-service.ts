@@ -1,227 +1,110 @@
-import { SpeechStatus } from '@/types/mascot-guide';
+import { messages, type MessageId } from '../config/mascot-guide'
+import assets from '../config/narration-assets.json'
 
-export interface SpeechCallbacks {
-  onComplete?: () => void;
-  onCancelled?: () => void;
-}
+type Language = 'ar' | 'en'
+export type NarrationStatus = 'idle' | 'loading' | 'speaking' | 'paused' | 'blocked' | 'unavailable'
+export interface SpeechCallbacks { onStart?: () => void; onEnd?: () => void; onError?: (reason: string) => void }
 
-class SpeechService {
-  private voices: SpeechSynthesisVoice[] = [];
-  private isInitialized = false;
-  private currentStatus: SpeechStatus = 'idle';
-  private statusListeners: ((status: SpeechStatus) => void)[] = [];
-  private pendingSpeech: { text: string; language: 'ar' | 'en'; callbacks?: SpeechCallbacks } | null = null;
-  
-  // Default config
-  private rate = 0.95;
-  private pitch = 1;
-  private volume = 1;
-
-  public initialize() {
-    if (typeof window === 'undefined' || !window.speechSynthesis || this.isInitialized) {
-      return;
-    }
-
-    this.isInitialized = true;
-    this.loadVoices();
-    
-    // Some browsers need a listener for when voices are loaded asynchronously
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.addEventListener('voiceschanged', () => {
-        this.loadVoices();
-        console.log(`[SpeechService] voiceschanged. voiceCount: ${this.voices.length}, hasPending: ${!!this.pendingSpeech}`);
-        // Guard: do not replay pending speech if we are already speaking.
-        // This prevents voiceschanged (which can fire multiple times) from
-        // cancelling and restarting active speech.
-        if (this.pendingSpeech && this.voices.length > 0 && this.currentStatus !== 'speaking') {
-          const { text, language, callbacks } = this.pendingSpeech;
-          this.pendingSpeech = null;
-          this.speak(text, language, callbacks);
-        }
-      });
-    }
+/** One owner for asset playback and language-matched speech fallback. No eager fetches. */
+export class SpeechService {
+  private generation = 0
+  private audio: HTMLAudioElement | null = null
+  private utterance: SpeechSynthesisUtterance | null = null
+  private timer: ReturnType<typeof setTimeout> | undefined
+  private listeners = new Set<(status: NarrationStatus) => void>()
+  private status: NarrationStatus = 'idle'
+  get isPlaying() { return this.status === 'speaking' }
+  get currentStatus() { return this.status }
+  subscribeToStatusChanges = (listener: (status: NarrationStatus) => void) => {
+    this.listeners.add(listener)
+    listener(this.status)
+    return () => { this.listeners.delete(listener) }
   }
-
-  private loadVoices() {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    this.voices = window.speechSynthesis.getVoices();
+  private setStatus(status: NarrationStatus) {
+    this.status = status
+    this.listeners.forEach(listener => listener(status))
   }
-
-  public isAvailable(): boolean {
-    if (typeof window === 'undefined') return false;
-    return !!window.speechSynthesis;
+  stop = () => {
+    this.generation++ // Invalidate callbacks before cancel() dispatches native events.
+    clearTimeout(this.timer)
+    if (this.audio) {
+      this.audio.onplaying = this.audio.onended = this.audio.onerror = this.audio.onwaiting = null
+      this.audio.pause()
+      this.audio.removeAttribute('src')
+      this.audio.load()
+      this.audio = null
+    }
+    if (this.utterance && typeof window !== 'undefined') window.speechSynthesis?.cancel()
+    this.utterance = null
+    this.setStatus('idle')
   }
-
-  public hasVoiceForLanguage(language: 'ar' | 'en'): boolean {
-    if (!this.isAvailable()) return false;
-    if (!this.isInitialized) {
-      this.initialize();
-    }
-    if (this.voices.length === 0) {
-      this.loadVoices();
-    }
-    return this.getPreferredVoice(language) !== null;
+  cancel = this.stop
+  pause = () => {
+    if (this.audio) this.audio.pause()
+    if (this.utterance) window.speechSynthesis?.pause()
+    this.setStatus('paused')
   }
-
-  private getPreferredVoice(language: 'ar' | 'en'): SpeechSynthesisVoice | null {
-    if (this.voices.length === 0) {
-      this.loadVoices();
+  play = (id: MessageId, language: Language, callbacks: SpeechCallbacks = {}) => {
+    this.stop()
+    if (typeof window === 'undefined') return
+    const generation = this.generation
+    const current = () => generation === this.generation
+    const started = () => { if (current()) { clearTimeout(this.timer); this.setStatus('speaking'); callbacks.onStart?.() } }
+    const ended = () => { if (current()) { clearTimeout(this.timer); this.setStatus('idle'); callbacks.onEnd?.() } }
+    const failed = (reason: string) => {
+      if (!current()) return
+      this.stop()
+      this.setStatus(reason === 'NotAllowedError' || reason === 'not-allowed' ? 'blocked' : 'unavailable')
+      callbacks.onError?.(reason)
     }
-    
-    if (language === 'ar') {
-      const arabicVoices = this.voices.filter(v => {
-        const lang = (v.lang || '').toLowerCase().replace('_', '-');
-        if (lang.startsWith('ar')) return true;
-        const name = (v.name || '').toLowerCase();
-        return name.includes('arabic') || name.includes('العربية');
-      });
-      if (arabicVoices.length > 0) {
-        // Prefer local voice if possible
-        const local = arabicVoices.find(v => v.localService);
-        return local || arabicVoices[0];
-      }
-    } else {
-      const englishVoices = this.voices.filter(v => {
-        const lang = (v.lang || '').toLowerCase().replace('_', '-');
-        if (lang.startsWith('en')) return true;
-        const name = (v.name || '').toLowerCase();
-        return name.includes('english');
-      });
-      if (englishVoices.length > 0) {
-        // Prefer a smooth local voice
-        const local = englishVoices.find(v => v.localService);
-        return local || englishVoices[0];
-      }
+    const speechFallback = () => {
+      if (!current()) return
+      const synth = window.speechSynthesis
+      const voice = synth?.getVoices().find(v => v.lang.toLowerCase().replace('_', '-').split('-')[0] === language)
+      if (!voice) { failed('no-matching-voice'); return }
+      const utterance = new SpeechSynthesisUtterance(messages[id][language].spoken)
+      this.utterance = utterance // Keep alive until end/cancel.
+      utterance.voice = voice
+      utterance.lang = voice.lang
+      utterance.rate = 0.95
+      utterance.onstart = started
+      utterance.onend = ended
+      utterance.onerror = event => failed(event.error)
+      this.setStatus('loading')
+      this.timer = setTimeout(() => failed('speech-start-timeout'), 5000)
+      try { synth.speak(utterance) } catch { failed('speech-failed') }
     }
-    
-    // No matching voice for this language
-    return null;
-  }
-
-  private setStatus(status: SpeechStatus) {
-    if (this.currentStatus !== status) {
-      this.currentStatus = status;
-      this.statusListeners.forEach(listener => listener(status));
+    const path = (assets[language] as Record<string, string>)[id]
+    if (!path) { speechFallback(); return }
+    const audio = new Audio()
+    this.audio = audio
+    audio.preload = 'none'
+    audio.src = path
+    audio.onplaying = started
+    audio.onended = ended
+    audio.onwaiting = () => { if (current()) this.setStatus('loading') }
+    let usedFallback = false
+    const fallback = () => {
+      if (!current() || usedFallback) return
+      usedFallback = true
+      clearTimeout(this.timer)
+      audio.onplaying = audio.onended = audio.onerror = audio.onwaiting = null
+      audio.pause()
+      audio.removeAttribute('src')
+      audio.load()
+      this.audio = null
+      speechFallback()
     }
-  }
-
-  public subscribeToStatusChanges(listener: (status: SpeechStatus) => void): () => void {
-    this.statusListeners.push(listener);
-    // Send immediate initial status
-    listener(this.currentStatus);
-    return () => {
-      this.statusListeners = this.statusListeners.filter(l => l !== listener);
-    };
-  }
-
-  public speak(text: string, language: 'ar' | 'en', callbacks?: SpeechCallbacks): boolean {
-    if (!this.isAvailable()) return false;
-
-    if (!this.isInitialized) {
-      this.initialize();
-    }
-
-    console.log(`[SpeechService] speak() entry. lang=${language}, textLength=${text.length}`);
-
-    this.cancel(); // Cancel any ongoing speech
-
-    if (this.voices.length === 0) {
-      console.log('[SpeechService] voices not yet loaded, pendingSpeech queued');
-      this.pendingSpeech = { text, language, callbacks };
-      return false;
-    }
-
-    const voice = this.getPreferredVoice(language);
-    console.log(`[SpeechService] voice count: ${this.voices.length}, selectedVoice: ${voice ? voice.name : 'null (no matching voice)'}, lang: ${language}`);
-
-    if (!voice) {
-      console.warn(`[SpeechService] No voice available for language '${language}'. Audible TTS skipped.`);
-      return false;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = voice;
-    utterance.lang = voice.lang || (language === 'ar' ? 'ar-SA' : 'en-US');
-    utterance.rate = this.rate;
-    utterance.pitch = this.pitch;
-    utterance.volume = this.volume;
-
-    utterance.onstart = () => {
-      console.log('[SpeechService] utterance onstart');
-      this.setStatus('speaking');
-    };
-    utterance.onend = () => {
-      console.log('[SpeechService] utterance onend');
-      this.setStatus('idle');
-      callbacks?.onComplete?.();
-    };
-    utterance.onerror = (e) => {
-      console.log(`[SpeechService] utterance onerror: ${e.error}`);
-      if (e.error !== 'canceled' && e.error !== 'interrupted') {
-        this.setStatus('error');
-        callbacks?.onCancelled?.();
-      } else {
-        this.setStatus('idle');
-        callbacks?.onCancelled?.();
-      }
-    };
-    utterance.onpause = () => this.setStatus('paused');
-    utterance.onresume = () => this.setStatus('speaking');
-
+    audio.onerror = fallback
+    this.setStatus('loading')
+    this.timer = setTimeout(fallback, 8000)
     try {
-      console.log('[SpeechService] native speechSynthesis.speak() invocation');
-      window.speechSynthesis.speak(utterance);
-      return true;
-    } catch (e) {
-      console.warn('[SpeechService] native speechSynthesis.speak() failed:', e);
-      this.setStatus('error');
-      callbacks?.onCancelled?.();
-      return false;
-    }
-  }
-
-  public cancel(): void {
-    if (!this.isAvailable()) return;
-    const wasActive = (typeof window !== 'undefined' && !!window.speechSynthesis && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) || this.currentStatus === 'speaking';
-    console.log(`[SpeechService] cancel() invocation. wasActive: ${wasActive}`);
-    this.pendingSpeech = null;
-    try {
-      window.speechSynthesis.cancel();
-      this.setStatus('idle');
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  public pause(): void {
-    if (!this.isAvailable()) return;
-    try {
-      window.speechSynthesis.pause();
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  public resume(): void {
-    if (!this.isAvailable()) return;
-    try {
-      window.speechSynthesis.resume();
-    } catch (e) {
-      // Ignore
-    }
+      void audio.play().catch(error => {
+        if (!current()) return
+        if (error.name === 'NotAllowedError') failed(error.name)
+        else fallback()
+      })
+    } catch { fallback() }
   }
 }
-
-export const speechService = new SpeechService();
-
-// ============================================================================
-// TEMPORARY DIAGNOSTIC TEST (REMOVE AFTER TESTING)
-// ============================================================================
-if (typeof window !== 'undefined') {
-  (window as unknown as { __testEnglishTTS?: (text?: string) => boolean }).__testEnglishTTS = (
-    text: string = 'Hello from Dafourlance.'
-  ) => {
-    return speechService.speak(text, 'en');
-  };
-}
-// ============================================================================
+export const speechService = new SpeechService()

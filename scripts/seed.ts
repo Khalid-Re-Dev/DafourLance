@@ -1,12 +1,18 @@
 import { PrismaClient } from "@prisma/client"
+import bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
 async function main() {
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD
+  if (!adminPassword || adminPassword.length < 12 || Buffer.byteLength(adminPassword, "utf8") > 72) {
+    throw new Error("Set SEED_ADMIN_PASSWORD to a unique password of at least 12 characters and at most 72 UTF-8 bytes before seeding.")
+  }
+
   console.log("Starting database seed...")
 
   console.log("Seeding admin user...")
-  const hashedPassword = await bcrypt.hash("dAdmin-123!", 10)
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
   await prisma.user.upsert({
     where: { email: "dadmin@daforlance.com" },
@@ -186,5 +192,8 @@ async function main() {
 }
 
 main()
-  .catch(console.error)
+  .catch((error) => {
+    console.error(error)
+    process.exitCode = 1
+  })
   .finally(() => prisma.$disconnect())

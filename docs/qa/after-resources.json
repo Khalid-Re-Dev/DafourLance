@@ -1,0 +1,136 @@
+{
+  "conditions": "Single local Chromium run, 390x844, unthrottled, through welcome; no production database. Cold/warm effects not controlled; not field CWV.",
+  "metrics": {
+    "lcp": 340,
+    "cls": 0
+  },
+  "totalResourceTransferBytes": 1006645,
+  "javascriptTransferBytes": 406246,
+  "resources": [
+    {
+      "name": "http://localhost:3000/_next/static/media/cairo_arabic-s.p.9cb3a3e2.woff2",
+      "bytes": 31012,
+      "type": "link"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/media/cairo_latin-s.p.ae65d18e.woff2",
+      "bytes": 33944,
+      "type": "link"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/537c5c4a0e8050b6.css",
+      "bytes": 913,
+      "type": "link"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/12e9b34d0e8e2267.css",
+      "bytes": 24448,
+      "type": "link"
+    },
+    {
+      "name": "http://localhost:3000/_next/image?url=%2Fprofessional-arab-man-in-blue-shirt-holding-tablet.jpg&w=384&q=75",
+      "bytes": 8354,
+      "type": "link"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/30b94cf4f8429b8f.js",
+      "bytes": 1531,
+      "type": "link"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/cdef20f2c468e724.js",
+      "bytes": 6215,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/83485740a91bd1bb.js",
+      "bytes": 13208,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/1c6212b3d3c04bba.js",
+      "bytes": 9134,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/turbopack-aa71bee5e1002ed4.js",
+      "bytes": 4218,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/0f030b417a218e42.js",
+      "bytes": 23254,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/2769a6addee16819.js",
+      "bytes": 67816,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/f53e22054c34a72f.js",
+      "bytes": 583,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/b075a18560a5a31c.js",
+      "bytes": 7268,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/3a606d42d5ebc5e6.js",
+      "bytes": 17819,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/930dd7636a9b51fb.js",
+      "bytes": 8159,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/f1a2e743f146f5f6.js",
+      "bytes": 9926,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/ba098ed3d8b68e78.js",
+      "bytes": 19626,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/7274b97e062d21d8.js",
+      "bytes": 36233,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/37961efcb108e2c7.js",
+      "bytes": 167980,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_vercel/insights/script.js",
+      "bytes": 300,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/4f9d93e5dbe2c2e2.js",
+      "bytes": 3296,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/_next/static/chunks/b94907606c3fb07e.js",
+      "bytes": 11211,
+      "type": "script"
+    },
+    {
+      "name": "http://localhost:3000/mascot/robot-mascot-poster.webp",
+      "bytes": 26266,
+      "type": "img"
+    },
+    {
+      "name": "http://localhost:3000/mascot/robot-mascot.webm",
+      "bytes": 473931,
+      "type": "video"
+    }
+  ]
+}

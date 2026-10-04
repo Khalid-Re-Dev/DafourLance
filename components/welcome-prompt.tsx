@@ -7,6 +7,7 @@ export interface WelcomePromptProps {
   language: 'ar' | 'en';
   isRTL: boolean;
   prefersReducedMotion: boolean;
+  onPlay?: () => void;
   onAccept: () => void;
   onDecline: () => void;
 }
@@ -17,6 +18,7 @@ export function WelcomePrompt({
   language,
   isRTL,
   prefersReducedMotion,
+  onPlay,
   onAccept,
   onDecline,
 }: WelcomePromptProps) {
@@ -57,7 +59,11 @@ export function WelcomePrompt({
             animate="animate"
             exit="exit"
             transition={{ duration: 0.25, ease: 'easeOut' }}
+            dir={isRTL ? "rtl" : "ltr"}
+            style={{ maxHeight: "calc(100dvh - 48px)", overflowY: "auto", marginTop: "env(safe-area-inset-top)" }}
+            onKeyDown={event => { if (event.key === "Escape") onDecline() }}
             role="dialog"
+            aria-modal="false"
             aria-live="polite"
             aria-labelledby="welcome-prompt-msg"
           >
@@ -70,6 +76,7 @@ export function WelcomePrompt({
               </p>
             </div>
             
+            {onPlay && <button onClick={onPlay} className="text-sm text-[#c5432e] underline focus-visible:outline">{language === 'ar' ? 'تشغيل الترحيب الصوتي' : 'Play welcome audio'}</button>}
             <div className={`flex items-center gap-3 mt-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <button
                 onClick={onAccept}

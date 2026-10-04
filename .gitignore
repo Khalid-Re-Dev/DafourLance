@@ -29,3 +29,7 @@ next-env.d.ts
 # database (SQLite) — NEVER commit database files
 prisma/dev.db
 prisma/dev.db-journal
+# Offline narration tooling
+.venv-tts/
+*.onnx
+*.onnx.json

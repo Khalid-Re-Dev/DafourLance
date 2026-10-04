@@ -100,7 +100,7 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
               whileHover={{ scale: 1.08 }}
             >
               {partner.logoUrl ? (
-                <img src={partner.logoUrl} alt={partner.name} className="max-h-12 max-w-full object-contain" />
+                <img loading="lazy" decoding="async" src={partner.logoUrl} alt={partner.name} className="max-h-12 max-w-full object-contain" />
               ) : (
                 <span className="text-lg lg:text-xl font-bold text-muted-foreground hover:text-[#1f2b3b] transition-colors">{partner.name}</span>
               )}
@@ -126,7 +126,7 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
               whileHover={{ scale: 1.08 }}
             >
               {partner.logoUrl ? (
-                <img src={partner.logoUrl} alt={partner.name} className="max-h-12 max-w-full object-contain" />
+                <img loading="lazy" decoding="async" src={partner.logoUrl} alt={partner.name} className="max-h-12 max-w-full object-contain" />
               ) : (
                 <span className="text-lg lg:text-xl font-bold text-muted-foreground hover:text-[#1f2b3b] transition-colors">{partner.name}</span>
               )}
@@ -135,10 +135,10 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
         </motion.div>
 
         <div className="flex justify-center gap-3 mt-10">
-          <motion.button className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
+          <motion.button aria-label={language === "ar" ? "الشركاء السابقون" : "Previous partners"} className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
-          <motion.button className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
+          <motion.button aria-label={language === "ar" ? "الشركاء التاليون" : "Next partners"} className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
             <ChevronRight className="w-5 h-5" />
           </motion.button>
         </div>
