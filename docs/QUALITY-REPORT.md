@@ -1,5 +1,7 @@
 # Landing quality audit and implementation
 
+Historical audit of the initial delivery. Subsequent narration readiness and Arabic-recording updates are documented in `NARRATION.md`; the original Arabic-audio limitation below is superseded by that update.
+
 ## 1. Git baseline
 
 Starting branch: `main`. Baseline: `2e671919a645fb8a033dbf5af89f549c4412f615`.

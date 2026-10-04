@@ -4,7 +4,7 @@ const fs = require('node:fs')
 const vm = require('node:vm')
 const ts = require('typescript')
 // Exercise the real service with deterministic native media implementations.
-function setup({ asset = true, voices = [] } = {}) {
+function setup({ asset = true, arAsset = false, voices = [] } = {}) {
   const instances = []; const utterances = []; let cancelCount = 0
   const voiceListeners = new Set(); const timers = new Map(); let timerId = 0
   const synth = { getVoices: () => voices, speak: u => utterances.push(u), cancel: () => cancelCount++, pause() {},
@@ -23,7 +23,7 @@ function setup({ asset = true, voices = [] } = {}) {
     window: { speechSynthesis: synth },
     setTimeout: (callback, ms) => { timers.set(++timerId, { callback, ms }); return timerId },
     clearTimeout: id => timers.delete(id),
-    require: name => name.includes('narration-assets') ? { en: asset ? { welcome: '/welcome.mp3', hero: '/hero.mp3' } : {}, ar: {} }
+    require: name => name.includes('narration-assets') ? { en: asset ? { welcome: '/welcome.mp3', hero: '/hero.mp3' } : {}, ar: arAsset ? require('../config/narration-assets.json').ar : {} }
       : { messages: require('../config/guide-messages.json') },
   }
   vm.runInNewContext(ts.transpileModule(fs.readFileSync('services/speech-service.ts', 'utf8'), {
@@ -58,6 +58,17 @@ test('Arabic never uses an English-only voice and downloads no model', () => {
   assert.equal(service.currentStatus, 'loading'); expire(3000)
   assert.equal(service.currentStatus, 'unavailable'); assert.equal(instances.length, 0); assert.equal(utterances.length, 0)
   assert.equal(service.currentError, 'no-matching-voice')
+})
+test('bundled Arabic narration uses real manifest assets without any browser speech engine', () => {
+  const { service, context, instances, utterances } = setup({ arAsset: true })
+  context.window.speechSynthesis = undefined
+  service.play('welcome', 'ar')
+  assert.equal(instances.length, 1)
+  assert.match(instances[0].src, /^\/audio\/guide\/ar\/welcome\.mp3\?v=/)
+  assert.equal(utterances.length, 0)
+  instances[0].onplaying(); assert.equal(service.currentStatus, 'speaking')
+  instances[0].onended(); assert.equal(service.currentStatus, 'idle')
+  service.stop()
 })
 test('missing asset uses only matching language; language change invalidates old callbacks', () => {
   const { service, instances, utterances, cancels } = setup({ voices: [{ lang: 'en-US' }, { lang: 'ar-JO' }] })

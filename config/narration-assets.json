@@ -1,5 +1,14 @@
 {
-  "ar": {},
+  "ar": {
+    "welcome": "/audio/guide/ar/welcome.mp3?v=d4c26a8bbf9e",
+    "hero": "/audio/guide/ar/hero.mp3?v=a7c017a648ce",
+    "about": "/audio/guide/ar/about.mp3?v=3d42bb46ec69",
+    "services": "/audio/guide/ar/services.mp3?v=b232a9273476",
+    "consultants": "/audio/guide/ar/consultants.mp3?v=e648d9469c3e",
+    "projects": "/audio/guide/ar/projects.mp3?v=7468851fd3d3",
+    "partners": "/audio/guide/ar/partners.mp3?v=e468d20788e9",
+    "contact": "/audio/guide/ar/contact.mp3?v=dfba0e292a10"
+  },
   "en": {
     "welcome": "/audio/guide/en/welcome.mp3?v=8664b1acddbf",
     "hero": "/audio/guide/en/hero.mp3?v=8196d955755a",
