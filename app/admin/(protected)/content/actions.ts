@@ -1,9 +1,12 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 
 export async function getSiteTexts() {
+  await requireAuth()
   return prisma.siteText.findMany({
     orderBy: { key: "asc" },
   })
@@ -19,12 +22,13 @@ export async function updateSiteText(
     extraJson?: string
   },
 ) {
+  await requireAuth()
   const siteText = await prisma.siteText.update({
     where: { id },
     data,
   })
   revalidatePath("/admin/content")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return siteText
 }
 
@@ -36,10 +40,11 @@ export async function createSiteText(data: {
   bodyEn?: string
   extraJson?: string
 }) {
+  await requireAuth()
   const siteText = await prisma.siteText.create({
     data,
   })
   revalidatePath("/admin/content")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return siteText
 }

@@ -1,9 +1,12 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 
 export async function getServices() {
+  await requireAuth()
   return prisma.service.findMany({
     orderBy: { order: "asc" },
   })
@@ -19,6 +22,7 @@ export async function createService(data: {
   isActive?: boolean
   isFeatured?: boolean
 }) {
+  await requireAuth()
   const maxOrder = await prisma.service.aggregate({ _max: { order: true } })
   const service = await prisma.service.create({
     data: {
@@ -27,7 +31,7 @@ export async function createService(data: {
     },
   })
   revalidatePath("/admin/services")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return service
 }
 
@@ -44,22 +48,25 @@ export async function updateService(
     isFeatured?: boolean
   },
 ) {
+  await requireAuth()
   const service = await prisma.service.update({
     where: { id },
     data,
   })
   revalidatePath("/admin/services")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return service
 }
 
 export async function deleteService(id: string) {
+  await requireAuth()
   await prisma.service.delete({ where: { id } })
   revalidatePath("/admin/services")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
 }
 
 export async function toggleServiceActive(id: string) {
+  await requireAuth()
   const service = await prisma.service.findUnique({ where: { id } })
   if (!service) return null
 
@@ -68,6 +75,6 @@ export async function toggleServiceActive(id: string) {
     data: { isActive: !service.isActive },
   })
   revalidatePath("/admin/services")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return updated
 }

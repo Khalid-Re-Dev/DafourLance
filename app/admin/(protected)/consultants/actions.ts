@@ -1,9 +1,12 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 
 export async function getConsultants() {
+  await requireAuth()
   return prisma.consultant.findMany({
     orderBy: { order: "asc" },
   })
@@ -20,6 +23,7 @@ export async function createConsultant(data: {
   isFeatured?: boolean
   order?: number
 }) {
+  await requireAuth()
   const maxOrder = await prisma.consultant.aggregate({ _max: { order: true } })
   const consultant = await prisma.consultant.create({
     data: {
@@ -28,7 +32,7 @@ export async function createConsultant(data: {
     },
   })
   revalidatePath("/admin/consultants")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return consultant
 }
 
@@ -47,22 +51,25 @@ export async function updateConsultant(
     isActive?: boolean
   },
 ) {
+  await requireAuth()
   const consultant = await prisma.consultant.update({
     where: { id },
     data,
   })
   revalidatePath("/admin/consultants")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return consultant
 }
 
 export async function deleteConsultant(id: string) {
+  await requireAuth()
   await prisma.consultant.delete({ where: { id } })
   revalidatePath("/admin/consultants")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
 }
 
 export async function toggleConsultantActive(id: string) {
+  await requireAuth()
   const consultant = await prisma.consultant.findUnique({ where: { id } })
   if (!consultant) return null
 
@@ -71,6 +78,6 @@ export async function toggleConsultantActive(id: string) {
     data: { isActive: !consultant.isActive },
   })
   revalidatePath("/admin/consultants")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return updated
 }

@@ -1,39 +1,18 @@
-# Stage 1: Install dependencies
-FROM node:20 AS deps
+FROM node:24-bookworm-slim AS build
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm install
-
-# Stage 2: Build
-FROM node:20 AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN npm install --global pnpm@11.25.0
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY prisma ./prisma
+RUN pnpm install --frozen-lockfile
 COPY . .
-RUN npx prisma generate
-RUN npm run build
-
-# Stage 3: Production
-FROM node:20 AS runner
+RUN pnpm exec prisma generate && pnpm build
+FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-
-# WARNING: In production (e.g., CapRover or Docker):
-# 1. Local image uploads saved to public/uploads will be lost on container rebuild.
-#    → Mount a persistent volume to /app/public/uploads
-# 2. SQLite database (prisma/dev.db) will be lost on container rebuild.
-#    → Mount a persistent volume to /app/prisma
-#    Without this, ALL CMS content will be reset on every deploy!
-
-COPY --from=builder /app ./
-
-# Declare persistent storage directories
-VOLUME /app/prisma
-VOLUME /app/public/uploads
-
+ENV PORT=3000
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=build --chown=node:node /app ./
+USER node
 EXPOSE 3000
-
-# On container start:
-# 1. Apply any pending database migrations
-# 2. Seed the database with CMS content (uses upsert — safe to re-run)
-# 3. Start the Next.js production server
-CMD sh -c "npx prisma migrate deploy && npx prisma db seed && npm start"
+CMD ["node", "scripts/start-production.cjs"]

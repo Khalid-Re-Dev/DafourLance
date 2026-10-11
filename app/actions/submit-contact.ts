@@ -3,18 +3,15 @@
 import prisma from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
+import { z } from "zod"
+import { allowRequest } from "@/lib/request-limit"
+const contactSchema=z.object({firstName:z.string().trim().min(1).max(100),lastName:z.string().trim().min(1).max(100),
+ email:z.string().trim().email().max(254),phone:z.string().trim().max(50).optional(),message:z.string().trim().min(1).max(5000)})
 export async function submitContactForm(formData: FormData) {
-  // 1. استخراج البيانات من الفورم
-  const firstName = formData.get("firstName") as string
-  const lastName = formData.get("lastName") as string
-  const email = formData.get("email") as string
-  const phone = formData.get("phone") as string
-  const message = formData.get("message") as string
-
-  // 2. التحقق من الحقول المطلوبة
-  if (!firstName || !lastName || !email || !message) {
-    return { success: false, error: "Missing required fields" }
-  }
+  if (!allowRequest("contact:global",20,60_000)) return {success:false,error:"Please try again shortly"}
+  const parsed=contactSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) return {success:false,error:"Please check the contact fields"}
+  const {firstName,lastName,email,phone,message}=parsed.data
 
   try {
     // 3. حفظ الرسالة في قاعدة البيانات

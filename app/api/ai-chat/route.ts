@@ -3,12 +3,20 @@ import { NextRequest, NextResponse } from "next/server"
 import { buildKnowledgeBase, getSystemPrompt } from "@/lib/knowledge-base"
 import { askAi, AiServiceError } from "@/lib/ai/ask-ai"
 
+import { z } from "zod"
+import { allowRequest } from "@/lib/request-limit"
+const inputSchema = z.object({
+ message:z.string().trim().min(1).max(2000),language:z.enum(["ar","en"]).optional(),
+ history:z.array(z.object({role:z.enum(["user","assistant"]),content:z.string().max(2000)})).max(20).default([]),
+})
 export async function POST(req: NextRequest) {
   let language: "ar" | "en" = "ar"
 
   try {
-    const body = await req.json()
-    const { message, history = [], language: langFromClient } = body
+    if (!allowRequest("ai-chat:global",30,60_000)) return NextResponse.json({reply:"يرجى المحاولة بعد قليل. Please try again shortly."},{status:429})
+    const parsed=inputSchema.safeParse(await req.json().catch(()=>null))
+    if (!parsed.success) return NextResponse.json({reply:"Invalid message or conversation history."},{status:400})
+    const {message,history,language:langFromClient}=parsed.data
 
     language = langFromClient === "en" ? "en" : "ar"
 

@@ -1,11 +1,14 @@
 // actions.ts
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 
 // جلب جميع المشاريع مرتبة
 export async function getProjects() {
+  await requireAuth()
   return prisma.project.findMany({
     orderBy: { order: "asc" },
   })
@@ -28,6 +31,7 @@ export async function createProject(data: {
   ctaLink?: string
   order?: number
 }) {
+  await requireAuth()
   const maxOrder = await prisma.project.aggregate({ _max: { order: true } })
   const project = await prisma.project.create({
     data: {
@@ -36,7 +40,7 @@ export async function createProject(data: {
     },
   })
   revalidatePath("/admin/projects")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return project
 }
 
@@ -61,24 +65,27 @@ export async function updateProject(
     isActive?: boolean
   },
 ) {
+  await requireAuth()
   const project = await prisma.project.update({
     where: { id },
     data,
   })
   revalidatePath("/admin/projects")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return project
 }
 
 // حذف مشروع
 export async function deleteProject(id: string) {
+  await requireAuth()
   await prisma.project.delete({ where: { id } })
   revalidatePath("/admin/projects")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
 }
 
 // تفعيل أو تعطيل المشروع
 export async function toggleProjectActive(id: string) {
+  await requireAuth()
   const project = await prisma.project.findUnique({ where: { id } })
   if (!project) return null
 
@@ -87,6 +94,6 @@ export async function toggleProjectActive(id: string) {
     data: { isActive: !project.isActive },
   })
   revalidatePath("/admin/projects")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return updated
 }

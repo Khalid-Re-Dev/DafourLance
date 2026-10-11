@@ -1,10 +1,13 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 import { getSession } from "@/lib/auth"
 
 export async function getFooterConfig() {
+  await requireAuth()
   try {
     let config = await prisma.footerConfig.findFirst({
       where: { isActive: true },
@@ -50,6 +53,7 @@ export async function updateFooterConfig(data: {
   copyrightAr?: string
   copyrightEn?: string
 }) {
+  await requireAuth()
   // Auth guard
   const session = await getSession()
   if (!session) {
@@ -76,7 +80,7 @@ export async function updateFooterConfig(data: {
     }
 
     revalidatePath("/admin/footer")
-    revalidatePath("/")
+    revalidatePath("/[lang]", "page")
     return { success: true, data: config }
   } catch (error) {
     console.error("Error updating footer config:", error)

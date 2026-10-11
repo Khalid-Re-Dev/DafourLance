@@ -4,8 +4,10 @@ const bcrypt = require("bcryptjs")
 const prisma = new PrismaClient()
 
 async function main() {
+  const adminEmail = (process.env.SEED_ADMIN_EMAIL || "admin@daforlance.com").trim().toLowerCase()
+  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } })
   const adminPassword = process.env.SEED_ADMIN_PASSWORD
-  if (!adminPassword || adminPassword.length < 12 || Buffer.byteLength(adminPassword, "utf8") > 72) {
+  if (!existingAdmin && (!adminPassword || adminPassword.length < 12 || Buffer.byteLength(adminPassword, "utf8") > 72)) {
     throw new Error("Set SEED_ADMIN_PASSWORD to a unique password of at least 12 characters and at most 72 UTF-8 bytes before seeding.")
   }
 
@@ -15,12 +17,12 @@ async function main() {
   // 1. Admin User
   // ─────────────────────────────────────────────────
   console.log("👤 Seeding admin user...")
-  const hashedPassword = await bcrypt.hash(adminPassword, 12)
+  const hashedPassword = existingAdmin?.password || await bcrypt.hash(adminPassword, 12)
   await prisma.user.upsert({
-    where: { email: "admin@daforlance.com" },
+    where: { email: adminEmail },
     update: {},
     create: {
-      email: "admin@daforlance.com",
+      email: adminEmail,
       password: hashedPassword,
       name: "Super Admin",
       role: "admin",
@@ -43,7 +45,7 @@ async function main() {
   for (const item of navItems) {
     await prisma.navItem.upsert({
       where: { id: item.id },
-      update: item,
+      update: {},
       create: item,
     })
   }
@@ -194,12 +196,7 @@ async function main() {
   for (const text of siteTexts) {
     await prisma.siteText.upsert({
       where: { key: text.key },
-      update: {
-        headingAr: text.headingAr,
-        headingEn: text.headingEn,
-        bodyAr: text.bodyAr,
-        bodyEn: text.bodyEn,
-      },
+      update: {},
       create: text,
     })
   }
@@ -262,7 +259,7 @@ async function main() {
   for (const cons of consultants) {
     await prisma.consultant.upsert({
       where: { id: cons.id },
-      update: cons,
+      update: {},
       create: cons,
     })
   }
@@ -337,7 +334,7 @@ async function main() {
   for (const proj of projects) {
     await prisma.project.upsert({
       where: { id: proj.id },
-      update: proj,
+      update: {},
       create: proj,
     })
   }
@@ -357,7 +354,7 @@ async function main() {
   for (const partner of partners) {
     await prisma.partner.upsert({
       where: { id: partner.id },
-      update: partner,
+      update: {},
       create: partner,
     })
   }
@@ -383,7 +380,7 @@ async function main() {
   }
   await prisma.footerConfig.upsert({
     where: { id: footerData.id },
-    update: footerData,
+    update: {},
     create: footerData,
   })
   console.log("   ✅ Footer config ready")
@@ -408,7 +405,7 @@ async function main() {
   }
   await prisma.contactInfo.upsert({
     where: { id: contactData.id },
-    update: contactData,
+    update: {},
     create: contactData,
   })
   console.log("   ✅ Contact info ready")
@@ -488,7 +485,7 @@ async function main() {
   for (const svc of services) {
     await prisma.service.upsert({
       where: { id: svc.id },
-      update: svc,
+      update: {},
       create: svc,
     })
   }

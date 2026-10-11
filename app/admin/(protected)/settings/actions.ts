@@ -1,5 +1,7 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 import { getSession } from "@/lib/auth"
@@ -11,6 +13,7 @@ function maskApiKey(key: string): string {
 }
 
 export async function getSettings() {
+  await requireAuth()
     const session = await getSession()
     if (!session) {
         throw new Error("Unauthorized")
@@ -31,6 +34,7 @@ export async function getSettings() {
 }
 
 export async function saveOpenAiKey(key: string) {
+  await requireAuth()
     const session = await getSession()
     if (!session) {
         return { success: false, error: "Unauthorized" }
@@ -61,6 +65,7 @@ export async function saveOpenAiKey(key: string) {
 }
 
 export async function deleteOpenAiKey() {
+  await requireAuth()
     const session = await getSession()
     if (!session) {
         return { success: false, error: "Unauthorized" }
