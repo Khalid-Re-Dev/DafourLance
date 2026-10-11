@@ -1,5 +1,7 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import prisma from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -52,6 +54,7 @@ export async function getBehaviorInstructions(): Promise<{
   success: boolean
   data: BehaviorData
 }> {
+  await requireAuth()
   try {
     const record = await prisma.aiKnowledgeBase.findUnique({
       where: { id: "singleton" },
@@ -75,6 +78,7 @@ export async function getBehaviorInstructions(): Promise<{
 export async function updateBehaviorInstructions(
   data: BehaviorData
 ): Promise<{ success: boolean; message: string }> {
+  await requireAuth()
   try {
     await prisma.aiKnowledgeBase.upsert({
       where: { id: "singleton" },
@@ -99,6 +103,7 @@ export async function updateBehaviorInstructions(
 // ── Knowledge Sections CRUD ────────────────────────────────
 
 export async function getAiKnowledgeSectionsAdmin(): Promise<SectionRecord[]> {
+  await requireAuth()
   try {
     const sections = await prisma.aiKnowledgeSection.findMany({
       orderBy: { order: "asc" },
@@ -131,6 +136,7 @@ export async function getAiKnowledgeSectionsAdmin(): Promise<SectionRecord[]> {
 export async function createAiKnowledgeSection(
   data: SectionInput
 ): Promise<{ success: boolean; message: string }> {
+  await requireAuth()
   try {
     // Get max order to place new section at end
     const maxOrder = await prisma.aiKnowledgeSection.aggregate({
@@ -153,6 +159,7 @@ export async function updateAiKnowledgeSection(
   id: string,
   data: Partial<SectionInput>
 ): Promise<{ success: boolean; message: string }> {
+  await requireAuth()
   try {
     await prisma.aiKnowledgeSection.update({
       where: { id },
@@ -171,6 +178,7 @@ export async function updateSectionContent(
   contentAr: string,
   contentEn: string
 ): Promise<{ success: boolean; message: string }> {
+  await requireAuth()
   try {
     await prisma.aiKnowledgeSection.update({
       where: { id },
@@ -187,6 +195,7 @@ export async function updateSectionContent(
 export async function deleteAiKnowledgeSection(
   id: string
 ): Promise<{ success: boolean; message: string }> {
+  await requireAuth()
   try {
     await prisma.aiKnowledgeSection.delete({
       where: { id },
@@ -215,6 +224,7 @@ export async function getAiKnowledgeBaseAdmin(): Promise<{
   success: boolean
   data: AiKnowledgeBaseData | null
 }> {
+  await requireAuth()
   try {
     const record = await prisma.aiKnowledgeBase.findUnique({
       where: { id: "singleton" },
@@ -243,6 +253,7 @@ export async function getAiKnowledgeBaseAdmin(): Promise<{
 export async function updateAiKnowledgeBase(
   data: AiKnowledgeBaseData
 ): Promise<{ success: boolean; message: string }> {
+  await requireAuth()
   try {
     await prisma.aiKnowledgeBase.upsert({
       where: { id: "singleton" },

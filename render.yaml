@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: dafourlance
+    runtime: node
+    plan: free
+    region: oregon
+    autoDeployTrigger: "off"
+    buildCommand: npm install --global pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm exec prisma generate && pnpm build
+    startCommand: node scripts/start-production.cjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true

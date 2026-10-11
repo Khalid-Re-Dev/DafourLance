@@ -22,13 +22,12 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    const result = await loginAction(formData)
-
-    if (result?.error) {
-      setError(result.error)
-      setIsLoading(false)
-    }
+    try {
+      const result = await loginAction(new FormData(e.currentTarget))
+      if (result.success) { router.replace("/admin"); router.refresh() }
+      else setError(result.error || "Sign in failed")
+    } catch { setError("Unable to sign in. Please try again.") }
+    finally { setIsLoading(false) }
   }
 
   return (

@@ -1,173 +1,58 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { createHash, timingSafeEqual } from "node:crypto"
 import bcrypt from "bcryptjs"
 import prisma from "./db"
-
-// Session-based auth with bcrypt password hashing
-// Session tokens use HMAC-like integrity verification
-
-export interface Session {
-  userId: string
-  email: string
-  name: string | null
-}
-
+import { allowRequest } from "./request-limit"
+import { passwordRevision, SESSION_SECONDS, signSession, verifySession } from "./session-token"
+export interface Session { userId: string; email: string; name: string | null }
 const SESSION_COOKIE_NAME = "admin_session"
-const BCRYPT_ROUNDS = 12
-
-// ──────────────────────────────────────────────
-// Password hashing (bcrypt)
-// ──────────────────────────────────────────────
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, BCRYPT_ROUNDS)
-}
-
+export async function hashPassword(password: string): Promise<string> { return bcrypt.hash(password,12) }
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  console.log("AUTH_DEBUG: verifyPassword called")
-  // Bcrypt hashes start with $2a$ or $2b$
-  if (hashedPassword.startsWith("$2a$") || hashedPassword.startsWith("$2b$")) {
-    console.log("AUTH_DEBUG: Detected bcrypt hash format")
-    const match = await bcrypt.compare(password, hashedPassword)
-    console.log("AUTH_DEBUG: bcrypt.compare match:", match)
-    return match
-  }
-
-  console.log("AUTH_DEBUG: Detected legacy format, falling back to SHA-256")
-  return verifyLegacySha256(password, hashedPassword)
+ if (/^\$2[aby]\$/.test(hashedPassword)) return bcrypt.compare(password, hashedPassword)
+ const legacySecret = process.env.LEGACY_AUTH_SECRET
+ if (!legacySecret || !/^[a-f0-9]{64}$/.test(hashedPassword)) return false
+ return timingSafeEqual(createHash("sha256").update(password+legacySecret).digest(),Buffer.from(hashedPassword,"hex"))
 }
-
-/** Check against legacy SHA-256 hash (used before bcrypt migration) */
-async function verifyLegacySha256(password: string, storedHash: string): Promise<boolean> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password + (process.env.AUTH_SECRET || "default-secret"))
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const computed = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-  return computed === storedHash
+export async function migratePasswordToBcrypt(userId: string, password: string): Promise<void> {
+ await prisma.user.update({where:{id:userId},data:{password:await hashPassword(password)}})
 }
-
-/**
- * Re-hash a user's password from legacy SHA-256 to bcrypt.
- * Called transparently on successful legacy login.
- */
-export async function migratePasswordToBcrypt(userId: string, plainPassword: string): Promise<void> {
-  const bcryptHash = await hashPassword(plainPassword)
-  await prisma.user.update({
-    where: { id: userId },
-    data: { password: bcryptHash },
-  })
-}
-
-// ──────────────────────────────────────────────
-// Session management
-// ──────────────────────────────────────────────
-
-async function computeTokenHash(payload: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(payload)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-}
-
 export async function createSession(userId: string): Promise<string> {
-  const sessionId = crypto.randomUUID()
-  const sessionData = JSON.stringify({ userId, sessionId, createdAt: Date.now() })
-  const hash = await computeTokenHash(sessionData)
-  const token = hash + "." + Buffer.from(sessionData).toString("base64")
-  return token
+ const user = await prisma.user.findUnique({where:{id:userId}})
+ if (!user || user.role !== "admin") throw new Error("Unauthorized")
+ return signSession(user.id,user.password)
 }
-
 export async function getSession(): Promise<Session | null> {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
-
-  if (!sessionCookie?.value) {
-    return null
-  }
-
-  try {
-    const [tokenHash, encodedData] = sessionCookie.value.split(".")
-    if (!tokenHash || !encodedData) return null
-
-    // Verify token integrity — re-compute hash and compare
-    const payload = Buffer.from(encodedData, "base64").toString()
-    const expectedHash = await computeTokenHash(payload)
-    if (tokenHash !== expectedHash) {
-      return null
-    }
-
-    const sessionData = JSON.parse(payload)
-
-    // Check session age (24 hours)
-    if (Date.now() - sessionData.createdAt > 24 * 60 * 60 * 1000) {
-      return null
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: sessionData.userId },
-      select: { id: true, email: true, name: true },
-    })
-
-    if (!user) return null
-
-    return {
-      userId: user.id,
-      email: user.email,
-      name: user.name,
-    }
-  } catch {
-    return null
-  }
+ const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value
+ if (!token) return null
+ const data = verifySession(token)
+ if (!data) return null
+ try {
+  const user = await prisma.user.findUnique({where:{id:data.userId}})
+  if (!user || user.role !== "admin" || passwordRevision(user.password) !== data.revision) return null
+  return {userId:user.id,email:user.email,name:user.name}
+ } catch { return null }
 }
-
 export async function requireAuth(): Promise<Session> {
-  const session = await getSession()
-  if (!session) {
-    redirect("/admin/login")
-  }
-  return session
+ const session = await getSession()
+ if (!session) redirect("/admin/login")
+ return session
 }
-
-export async function login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
-
-    if (!user) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    const isValid = await verifyPassword(password, user.password)
-    if (!isValid) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    // Migrate legacy SHA-256 hash to bcrypt on successful login
-    if (!user.password.startsWith("$2a$") && !user.password.startsWith("$2b$")) {
-      await migratePasswordToBcrypt(user.id, password)
-    }
-
-    const token = await createSession(user.id)
-    const cookieStore = await cookies()
-    cookieStore.set(SESSION_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60, // 24 hours
-      path: "/",
-    })
-
-    return { success: true }
-  } catch (error) {
-    console.error("Login error:", error)
-    return { success: false, error: "An error occurred during login" }
-  }
+export async function login(email: string,password: string): Promise<{success:boolean;error?:string}> {
+ const invalid = {success:false,error:"Invalid credentials"}
+ if (!email || email.length > 254 || !password || Buffer.byteLength(password)>72) return invalid
+ const bucket = createHash("sha256").update(email.toLowerCase().trim()).digest("hex")
+ if (!allowRequest(`login:${bucket}`,10,15*60*1000)) return {success:false,error:"Too many sign-in attempts. Please try again in 15 minutes."}
+ try {
+  const user = await prisma.user.findUnique({where:{email:email.toLowerCase().trim()}})
+  if (!user || user.role !== "admin" || !(await verifyPassword(password,user.password))) return invalid
+  if (!/^\$2[aby]\$/.test(user.password)) await migratePasswordToBcrypt(user.id,password)
+  const token = await createSession(user.id)
+  ;(await cookies()).set(SESSION_COOKIE_NAME,token,{httpOnly:true,secure:process.env.NODE_ENV === "production",sameSite:"lax",maxAge:SESSION_SECONDS,path:"/"})
+  return {success:true}
+ } catch {
+  console.error("Admin login failed: check database and AUTH_SECRET configuration")
+  return {success:false,error:"Sign in is temporarily unavailable. Please try again."}
+ }
 }
-
-export async function logout(): Promise<void> {
-  const cookieStore = await cookies()
-  cookieStore.delete(SESSION_COOKIE_NAME)
-}
+export async function logout(): Promise<void> { ;(await cookies()).delete(SESSION_COOKIE_NAME) }

@@ -1,9 +1,12 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 
 export async function getNavItems() {
+  await requireAuth()
   return prisma.navItem.findMany({
     orderBy: { order: "asc" },
   })
@@ -17,6 +20,7 @@ export async function createNavItem(data: {
   isVisible?: boolean
   isExternal?: boolean
 }) {
+  await requireAuth()
   const maxOrder = await prisma.navItem.aggregate({ _max: { order: true } })
   const navItem = await prisma.navItem.create({
     data: {
@@ -25,7 +29,7 @@ export async function createNavItem(data: {
     },
   })
   revalidatePath("/admin/navigation")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return navItem
 }
 
@@ -40,22 +44,25 @@ export async function updateNavItem(
     isExternal?: boolean
   },
 ) {
+  await requireAuth()
   const navItem = await prisma.navItem.update({
     where: { id },
     data,
   })
   revalidatePath("/admin/navigation")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return navItem
 }
 
 export async function deleteNavItem(id: string) {
+  await requireAuth()
   await prisma.navItem.delete({ where: { id } })
   revalidatePath("/admin/navigation")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
 }
 
 export async function toggleNavItemVisible(id: string) {
+  await requireAuth()
   const navItem = await prisma.navItem.findUnique({ where: { id } })
   if (!navItem) return null
 
@@ -64,6 +71,6 @@ export async function toggleNavItemVisible(id: string) {
     data: { isVisible: !navItem.isVisible },
   })
   revalidatePath("/admin/navigation")
-  revalidatePath("/")
+  revalidatePath("/[lang]", "page")
   return updated
 }

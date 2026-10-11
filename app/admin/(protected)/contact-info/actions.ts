@@ -1,9 +1,12 @@
 "use server"
 
+import { requireAuth } from "@/lib/auth"
+
 import { revalidatePath } from "next/cache"
 import prisma from "@/lib/db"
 
 export async function getContactInfo() {
+  await requireAuth()
   try {
     let config = await prisma.contactInfo.findFirst({
       where: { isActive: true },
@@ -42,6 +45,7 @@ export async function updateContactInfo(data: {
   subtitleAr?: string
   subtitleEn?: string
 }) {
+  await requireAuth()
   try {
     let config = await prisma.contactInfo.findFirst({
       where: { isActive: true },
@@ -62,7 +66,7 @@ export async function updateContactInfo(data: {
     }
 
     revalidatePath("/admin/contact-info")
-    revalidatePath("/")
+    revalidatePath("/[lang]", "page")
     return config
   } catch (error) {
     console.error("Error updating contact info:", error)

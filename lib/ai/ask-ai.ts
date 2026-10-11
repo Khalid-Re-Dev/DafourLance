@@ -31,7 +31,7 @@ async function resolveApiKey(): Promise<string | null> {
     console.error("Failed to fetch API key from database:", err)
   }
 
-  return process.env.OPENAI_API_KEY ?? null
+  return process.env.OPENROUTER_API_KEY ?? process.env.OPENAI_API_KEY ?? null
 }
 
 export async function askAi({
@@ -62,6 +62,7 @@ export async function askAi({
       model: openrouter(model),
       messages,
       temperature,
+      maxOutputTokens: 600,
     })
 
     return text

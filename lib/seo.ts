@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 export function siteOrigin() {
-  const configured = process.env.SITE_URL
+  const configured = process.env.SITE_URL || process.env.RENDER_EXTERNAL_URL
   if (!configured) return null
   try { const url = new URL(configured); return ['http:', 'https:'].includes(url.protocol) ? url.origin : null } catch { return null }
 }

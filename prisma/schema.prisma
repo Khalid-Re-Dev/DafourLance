@@ -156,6 +156,7 @@ model ContactMessage {
 
 // 🖼️ سجل الصور المرفوعة
 model UploadedImage {
+  data Bytes? @db.ByteA
   id        String   @id @default(cuid())
   filename  String
   url       String
