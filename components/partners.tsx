@@ -136,10 +136,10 @@ export default function Partners({ partners = [], siteTexts = {} }: PartnersProp
 
         <div className="flex justify-center gap-3 mt-10">
           <motion.button aria-label={language === "ar" ? "الشركاء السابقون" : "Previous partners"} className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
-            <ChevronLeft className="w-5 h-5" />
+            {isRTL ? <ChevronRight className="w-5 h-5" aria-hidden="true" /> : <ChevronLeft className="w-5 h-5" aria-hidden="true" />}
           </motion.button>
           <motion.button aria-label={language === "ar" ? "الشركاء التاليون" : "Next partners"} className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center hover:border-[#fe6a52] hover:text-[#fe6a52] transition-colors">
-            <ChevronRight className="w-5 h-5" />
+            {isRTL ? <ChevronLeft className="w-5 h-5" aria-hidden="true" /> : <ChevronRight className="w-5 h-5" aria-hidden="true" />}
           </motion.button>
         </div>
       </div>
