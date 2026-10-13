@@ -54,3 +54,21 @@ Recorded greeting needs no API key. Generated chat uses OpenRouter (`openrouter/
 Run `pnpm test`, `pnpm lint`, `pnpm exec tsc --noEmit`, and `pnpm build`. Use a disposable local database for `TEST_DATABASE_URL=... node scripts/test-admin-database.cjs` after migration/seed; it modifies test data and must never point to production.
 
 Before going live verify login, protected pages/actions, all CMS operations, contact submission, image persistence across restart, Arabic/English greeting playback and responsive presentation. Then repeat health, login, uploads, CMS-to-landing updates and log checks on the actual host. Local tests do not establish hosted readiness or data-migration safety.
+
+## Restore the services shown in the reference
+
+After restoring the SQLite backup into the dedicated PostgreSQL database, preview the scoped service repair:
+
+```sh
+node scripts/restore-reference-services.cjs
+```
+
+Verify that DATABASE_URL targets DafourLance, then apply explicitly:
+
+```sh
+node scripts/restore-reference-services.cjs --apply
+```
+
+This transaction activates and orders the six reference services (web development, UI design, marketing, training, consulting, analytics). It creates only missing services, matches imported records by ID or exact Arabic/English title, preserves existing descriptions and IDs, and stops on ambiguous duplicates. It never changes projects, users or other CMS tables. It is not part of startup. The existing SQLite backup includes all six services but marketing is inactive; ordinary seed intentionally does not override this state.
+
+The project section now shows the first four active records in CMS order, with View all/Show less for additional records and the existing detail dialog. The backup contains two extra test projects: these remain intact and visible according to CMS order. Review their publishing status in the dashboard instead of deleting them during migration. No fabricated fallback project is displayed when the database is empty or unavailable.
