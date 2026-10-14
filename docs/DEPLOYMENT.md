@@ -37,7 +37,8 @@ Existing `/uploads/...` URLs remain unchanged. Copy/back up or re-upload files t
 
 `render.yaml` defines one free Node web service, no paid disks or database. Automatic deployment is disabled. Use the dedicated workspace and supply `DATABASE_URL`; the Blueprint generates `AUTH_SECRET`.
 
-- Build: `npm install --global pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm exec prisma generate && pnpm build`
+- Build: `npx --yes pnpm@11.25.0 install --frozen-lockfile --prod=false && npx --yes pnpm@11.25.0 exec prisma generate && npx --yes pnpm@11.25.0 build`
+- The pinned pnpm runs from npm's cache. Do not install it globally: Render's system package directory is read-only (`EROFS`). Keep `--prod=false` so the build includes TypeScript and Tailwind dependencies even when `NODE_ENV=production`.
 - Start: `node scripts/start-production.cjs`
 - Health: `/api/health` returns 503 if required database queries fail.
 - Node: 24. The server binds to `0.0.0.0` on Render's `PORT`.

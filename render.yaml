@@ -5,7 +5,7 @@ services:
     plan: free
     region: oregon
     autoDeployTrigger: "off"
-    buildCommand: npm install --global pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm exec prisma generate && pnpm build
+    buildCommand: npx --yes pnpm@11.25.0 install --frozen-lockfile --prod=false && npx --yes pnpm@11.25.0 exec prisma generate && npx --yes pnpm@11.25.0 build
     startCommand: node scripts/start-production.cjs
     healthCheckPath: /api/health
     envVars:
